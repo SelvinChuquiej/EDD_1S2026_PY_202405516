@@ -129,5 +129,19 @@ sub eliminar_codigo {
     return 1;
 }
 
+sub actualizar_stock {
+    my ($self, $code, $delta) = @_;
+    my $node = $self->bucar_codigo($code);
+    return (0, "Medicamento no encontrado") if !$node;
+
+    my $stock_actual = $node->{stock};
+    if($delta < 0 && $stock_actual + $delta < 0) {
+        return (0, "No hay suficiente stock para realizar la operación");
+    }
+
+    $node->{stock} += $stock_actual + $delta;
+    return (1, "Stock actualizado correctamente");
+}
+
 1;
 
