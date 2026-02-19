@@ -63,8 +63,9 @@ sub menu_admin {
             admin_registrar_medicamento(); 
         }elsif ($op eq '2') { 
             carga_masiva_csv(); 
-        }elsif ($op eq '3') { 
+        }elsif ($op eq '6') { 
             $INVENTARIO->imprimir(); 
+            pause();
         }elsif ($op eq '5') { 
             admin_procesar_solicitudes();
         } elsif($op eq '0') { 

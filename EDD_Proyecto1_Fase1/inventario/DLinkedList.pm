@@ -79,6 +79,9 @@ sub imprimir {
     my $current = $self->{head};
     while ($current) {
         print "Codigo: $current->{code}, Nombre: $current->{name}, Principio Activo: $current->{principle}, Laboratorio: $current->{laboratory}, Stock: $current->{stock}, Fecha de Vencimiento: $current->{expiration}, Precio: $current->{price}, Nivel Minimo: $current->{min_level}\n";
+        if ($current->{stock} < $current->{min_level}) {
+            print "Precaucion: Stock debajo por el minimo\n";
+        }
         $current = $current->{next};
     }
 }
