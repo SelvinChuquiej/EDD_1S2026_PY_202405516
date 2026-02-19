@@ -83,7 +83,7 @@ sub imprimir {
     }
 }
 
-sub bucar_codigo {
+sub buscar_codigo {
     my ($self, $code) = @_;
     my $current = $self->{head};
     while ($current) {
@@ -96,7 +96,7 @@ sub bucar_codigo {
 sub eliminar_codigo {
     my ($self, $code) = @_;
 
-    my $node = $self->bucar_codigo($code);
+    my $node = $self->buscar_codigo($code);
     return 0 if !$node; 
 
     # Si el nodo a eliminar es el único nodo en la lista
@@ -131,15 +131,17 @@ sub eliminar_codigo {
 
 sub actualizar_stock {
     my ($self, $code, $delta) = @_;
-    my $node = $self->bucar_codigo($code);
+    my $node = $self->buscar_codigo($code);
     return (0, "Medicamento no encontrado") if !$node;
-
+    
     my $stock_actual = $node->{stock};
+    # print "debug-> stock actual: $stock_actual | delta: $delta\n";
+
     if($delta < 0 && $stock_actual + $delta < 0) {
         return (0, "No hay suficiente stock para realizar la operación");
     }
 
-    $node->{stock} += $stock_actual + $delta;
+    $node->{stock} = $stock_actual + $delta;
     return (1, "Stock actualizado correctamente");
 }
 

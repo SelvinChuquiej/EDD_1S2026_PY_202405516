@@ -3,10 +3,13 @@ use warnings;
 use FindBin;
 use lib $FindBin::Bin; 
 use Text::CSV;
+use POSIX qw(strftime);
 
 use inventario::DLinkedList;
+use solicitudes::CircularDLinkedList;
 
 my $INVENTARIO = inventario::DLinkedList->new();
+my $SOLICITUDES = solicitudes::CircularDLinkedList->new();
 
 sub read_option {
     my ($msg) = @_;
@@ -62,13 +65,15 @@ sub menu_admin {
             carga_masiva_csv(); 
         }elsif ($op eq '3') { 
             $INVENTARIO->imprimir(); 
-        }
-        else { print "Opcion invalida.\n"; pause(); }
+        }elsif ($op eq '5') { 
+            admin_procesar_solicitudes();
+        } elsif($op eq '0') { 
+            last; 
+        } else { print "Opcion invalida.\n"; pause(); }
     }
 }
 
 sub menu_usuario {
-
     while (1) {
         print "\n--- Menu Usuario Departamental ---\n";
         print "1) Consultar Disponibilidad de Medicamentos\n";
@@ -79,16 +84,23 @@ sub menu_usuario {
 
         if($op eq '1') { 
             print "Funcionalidad no implementada aun.\n";
+        } elsif($op eq '2') { 
+            solicitar_reabastecimiento();
+        } elsif($op eq '3') { 
+            print "Funcionalidad no implementada aun.\n";
+        } elsif($op eq '0') { 
+            last; 
         } else { 
             print "Opcion invalida.\n"; pause(); 
         }
     }
 }
 
+# Admin
 sub admin_registrar_medicamento { 
     print "Registrar medicamento\n"; 
     print "Código: (MED000)"; chomp(my $code = <STDIN>);
-    if ($INVENTARIO->bucar_codigo($code)) {
+    if ($INVENTARIO->buscar_codigo($code)) {
         print "Error: Código ya existe.\n"; pause();
         return;
     }
@@ -110,6 +122,8 @@ sub admin_registrar_medicamento {
         price => $price,
         min_level => $min_level
     });
+    print "Medicamento registrado.\n";
+    pause();
 }
 
 sub carga_masiva_csv {
@@ -119,16 +133,16 @@ sub carga_masiva_csv {
     my $csv = Text::CSV->new({ binary => 1 });
     $csv->getline($fh);
     while (my $row = $csv->getline($fh)) {
-        my ($code, $name, $principle, $laboratory, $stock, $expiration, $price, $min_level) = @$row;
-        next if $INVENTARIO->bucar_codigo($code);
+        my ($code, $name, $principle, $laboratory, $price, $stock, $expiration, $min_level) = @$row;
+        next if $INVENTARIO->buscar_codigo($code);
         $INVENTARIO->agregar({
             code => $code,
             name => $name,
             principle => $principle,
             laboratory => $laboratory,
+            price => $price,
             stock => $stock,
             expiration => $expiration,
-            price => $price,
             min_level => $min_level
         });
 
@@ -137,6 +151,80 @@ sub carga_masiva_csv {
 
     close($fh);
     print "Carga masiva finalizada.\n";
+    pause();
+}
+
+sub admin_procesar_solicitudes {
+    my $sol = $SOLICITUDES->mirar_head();
+
+    if (!$sol) {
+        print "No hay solicitudes pendientes.\n";
+        pause();
+        return;
+    }
+
+    print "\n=== Solicitud Pendiente ===\n";
+    print "Depto: " . ($sol->{codigo_depto} // "N/A") . "\n";
+    print "Medicamento: " . ($sol->{codigo_med} // "N/A") . "\n";
+    print "Cantidad: " . ($sol->{cantidad} // 0) . "\n";
+    print "Prioridad: " . ($sol->{prioridad} // "N/A") . "\n";
+    print "Fecha: " . ($sol->{fecha_solicitud} // "N/A") . "\n";
+    print "Justificacion: " . ($sol->{justificacion} // "") . "\n";
+
+    print "\n1) Aprobar\n";
+    print "2) Rechazar\n";
+    print "0) Volver\n";
+
+    my $op = read_option("Opcion: ");
+
+    if ($op eq '1') {
+        my $code = $sol->{codigo_med};
+        my $qty  = $sol->{cantidad};
+
+        my ($ok, $msg) = $INVENTARIO->actualizar_stock($code, -$qty);
+
+        if ($ok) {
+            $sol->{estado} = "aprobada";  
+            $SOLICITUDES->remove_head();
+            print "Solicitud aprobada. $msg\n";
+        } else {
+            print "No se pudo aprobar: $msg\n";
+        }
+        pause();
+        return;
+    }
+
+    if ($op eq '2') {
+        $sol->{estado} = "rechazada";
+        $SOLICITUDES->remove_head();
+        print "Solicitud rechazada.\n";
+        pause();
+        return;
+    }
+    return;
+}
+
+# Usuario
+sub solicitar_reabastecimiento {
+
+    print "Codigo de departamento: "; chomp(my $codigo_depto = <STDIN>);
+    print "Codigo de medicamento: "; chomp(my $codigo_med = <STDIN>);
+    print "Cantidad solicitada: "; chomp(my $cantidad = <STDIN>);
+    print "Prioridad (urgente/alta/media/baja): "; chomp(my $prioridad = <STDIN>);
+    print "Justificacion: "; chomp(my $justificacion = <STDIN>);
+    my $fecha = strftime("%Y-%m-%d", localtime);
+
+    $SOLICITUDES->agregar({
+        codigo_depto => $codigo_depto,
+        codigo_med => $codigo_med,
+        cantidad => $cantidad,
+        prioridad => $prioridad,
+        justificacion => $justificacion,
+        fecha_solicitud => $fecha,
+        estado => "pendiente"
+    });
+
+    print "Solicitud creada correctamente.\n";
     pause();
 }
 

@@ -82,4 +82,10 @@ sub remove_head {
     return $removed;
 }
 
+sub mirar_head {
+    my ($self) = @_;
+    return undef if $self->is_empty();
+    return $self->{head};
+}
+
 1;
