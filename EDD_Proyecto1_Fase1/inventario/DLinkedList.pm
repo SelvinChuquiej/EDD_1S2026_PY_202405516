@@ -66,7 +66,7 @@ sub agregar {
         }
 
         if ($code_new eq $current->{code}) {
-            print "Error: El código '$code_new' ya existe en el inventario.\n";
+            print "Error: El codigo '$code_new' ya existe en el inventario.\n";
             return;
         }
 
@@ -78,7 +78,7 @@ sub imprimir {
     my ($self) = @_;
     my $current = $self->{head};
     while ($current) {
-        print "Código: $current->{code}, Nombre: $current->{name}, Principio Activo: $current->{principle}, Laboratorio: $current->{laboratory}, Stock: $current->{stock}, Fecha de Vencimiento: $current->{expiration}, Precio: $current->{price}, Nivel Mínimo: $current->{min_level}\n";
+        print "Codigo: $current->{code}, Nombre: $current->{name}, Principio Activo: $current->{principle}, Laboratorio: $current->{laboratory}, Stock: $current->{stock}, Fecha de Vencimiento: $current->{expiration}, Precio: $current->{price}, Nivel Minimo: $current->{min_level}\n";
         $current = $current->{next};
     }
 }
