@@ -103,4 +103,66 @@ sub contar {
     return $count;
 }
 
+sub generar_reporte_dot {
+    my ($self, $archivo) = @_;
+    return if $self->is_empty();
+
+    open(my $fh, '>', $archivo) or die "No se pudo crear DOT";
+
+    print $fh "digraph G {\n";
+    print $fh "rankdir=LR;\n";
+    print $fh "splines=true;\n";
+    print $fh "node [shape=circle, style=filled, fillcolor=white, fontname=\"Arial\"];\n";
+
+    my $head = $self->{head};
+    my $current = $head;
+
+    my $pend_count = 0;
+    my $pend_head  = undef;  
+    my $pend_prev  = undef;  
+
+    do {
+        if (defined $current->{estado} && lc($current->{estado}) eq "pendiente") {
+            $pend_count++;
+            $pend_head = $current if !defined $pend_head;
+            if (defined $pend_prev) {
+                print $fh "\"$pend_prev\" -> \"$current\" [color=red, penwidth=2];\n";
+                print $fh "\"$current\" -> \"$pend_prev\" [color=black, penwidth=2];\n";
+            }
+
+            $pend_prev = $current;
+        }
+        $current = $current->{next};
+    } while ($current != $head);
+
+    print $fh "contador [shape=note, style=filled, fillcolor=lightgrey, label=\"Pendientes: $pend_count\"];\n";
+
+    if ($pend_count == 0) {
+        print $fh "}\n";
+        close($fh);
+        return;
+    }
+    $current = $head;
+    do {
+        if (defined $current->{estado} && lc($current->{estado}) eq "pendiente") {
+
+            my $label =
+                "Solicitud de\\nReabastecimiento\\n\\n" .
+                "No: $current->{id}\\n" .
+                "Medicamento: $current->{codigo_med}\\n" .
+                "Cantidad: $current->{cantidad}\\n" .
+                "Prioridad: $current->{prioridad}";
+
+            print $fh "\"$current\" [label=\"$label\"];\n";
+        }
+        $current = $current->{next};
+    } while ($current != $head);
+
+    print $fh "\"$pend_prev\" -> \"$pend_head\" [color=red, penwidth=2];\n";
+    print $fh "\"$pend_head\" -> \"$pend_prev\" [color=black, penwidth=2];\n";
+
+    print $fh "}\n";
+    close($fh);
+}
+
 1;

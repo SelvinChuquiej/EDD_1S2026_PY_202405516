@@ -70,4 +70,59 @@ sub imprimir {
     } while ($cur != $self->{head});
 }
 
+sub generar_reporte_dot {
+    my ($self, $archivo) = @_;
+    return if $self->is_empty();
+
+    open(my $fh, '>', $archivo) or die "No se pudo crear DOT";
+
+    print $fh "digraph G {\n";
+    print $fh "rankdir=TB;\n";
+    print $fh "splines=ortho;\n";
+    print $fh "nodesep=0.6;\n";
+    print $fh "ranksep=0.8;\n";
+    print $fh "node [shape=box, style=rounded, fontname=\"Arial\"];\n";
+    print $fh "edge [fontname=\"Arial\"];\n";
+    print $fh "{ rank=same; \n";
+
+    my $head = $self->{head};
+    my $current = $head;
+
+    do {
+        print $fh "\"P_$current\" [label=\"Proveedor\\nNIT: $current->{nit}\\n$current->{empresa}\"];\n";
+        $current = $current->{next};
+    } while ($current != $head);
+    print $fh "}\n"; # fin rank=same
+
+    $current = $head;
+    do {
+        print $fh "\"P_$current\" -> \"P_$current->{next}\";\n";
+        $current = $current->{next};
+    } while ($current != $head);
+
+    $current = $head;
+    do {
+        my $entregas = $current->{entregas};
+        my $ehead = $entregas ? $entregas->{head} : undef;
+        if ($ehead) {
+            my $e = $ehead;
+            my $prev = undef;
+            while ($e) {
+                my $elabel = "Entrega\\nMed: $e->{codigo_med}\\nCant: $e->{cantidad}";
+                print $fh "\"E_$e\" [shape=box, style=\"rounded,filled\", fillcolor=\"#E9EEF5\", label=\"$elabel\"];\n";
+                if ($prev) {
+                    print $fh "\"E_$prev\" -> \"E_$e\" [dir=none];\n"; # línea limpia vertical
+                }
+                $prev = $e;
+                $e = $e->{next};
+            }
+            print $fh "\"P_$current\" -> \"E_$ehead\" [color=\"#555555\"];\n";
+            print $fh "{ rank=same; \"P_$current\"; }\n";
+        }
+        $current = $current->{next};
+    } while ($current != $head);
+
+    print $fh "}\n";
+    close($fh);
+}
 1;

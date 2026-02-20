@@ -2,6 +2,7 @@ package inventario::InventarioDLinkedList;
 
 use strict;
 use warnings;
+use Time::Local;
 
 use inventario::NodoInventario;
 use constant Nodo => 'inventario::NodoInventario';
@@ -147,6 +148,46 @@ sub actualizar_stock {
 
     $node->{stock} = $stock_actual + $delta;
     return (1, "Stock actualizado correctamente");
+}
+
+sub generar_reporte_dot {
+    my ($self, $archivo) = @_;
+    open(my $fh, '>', $archivo) or die "No se pudo crear el archivo DOT";
+
+    print $fh "digraph G {\n";
+    print $fh "rankdir=LR;\n";
+    print $fh "node [shape=record, style=filled];\n";
+
+    my $current = $self->{head};
+
+    while ($current) {
+        my $color = "lightgreen"; 
+        if ($current->{stock} <= $current->{min_level}) {
+            $color = "lightcoral";
+        }
+        elsif ($current->{expiration}) {
+            my $today = time;
+            my ($y,$m,$d) = split(/-/, $current->{expiration});
+            my $exp_time = timelocal(0,0,0,$d,$m-1,$y);
+            my $dias = int(($exp_time - $today) / (60*60*24));
+            if ($dias >= 0 && $dias <= 5) {
+                $color = "khaki";
+            }
+        }
+        my $label = "{ Codigo: $current->{code} | ".
+                    "Vence: $current->{expiration} | ".
+                    "Nombre: $current->{name} | ".
+                    "Stock: $current->{stock} }";
+        print $fh "\"$current\" [label=\"$label\", fillcolor=\"$color\"];\n";
+        if ($current->{next}) {
+            print $fh "\"$current\" -> \"$current->{next}\";\n";
+            print $fh "\"$current->{next}\" -> \"$current\";\n";
+        }
+        $current = $current->{next};
+    }
+
+    print $fh "}\n";
+    close($fh);
 }
 
 1;

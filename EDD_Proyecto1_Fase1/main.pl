@@ -96,6 +96,8 @@ sub menu_admin {
         } elsif ($op eq '6') { 
             $INVENTARIO->imprimir(); 
             pause();
+        }elsif ($op eq '8') { 
+            admin_reportes_graphviz(); 
         } elsif($op eq '0') { 
             last; 
         } else { print "Opcion invalida.\n"; pause(); }
@@ -157,8 +159,7 @@ sub admin_registrar_medicamento {
 }
 
 sub admin_carga_masiva_csv {
-    print "Ingrese nombre del archivo CSV: ";
-    chomp(my $file = <STDIN>);
+    print "Ingrese nombre del archivo CSV: "; chomp(my $file = <STDIN>);
     open(my $fh, "<", $file) or die "No se pudo abrir el archivo.\n";
     my $csv = Text::CSV->new({ binary => 1 });
     $csv->getline($fh);
@@ -320,6 +321,37 @@ sub admin_registrar_entrega {
     }
 
     pause();
+}
+
+sub admin_reportes_graphviz {
+    print "\n=== Reportes Graphviz ===\n";
+    print "1) Inventario\n";
+    print "2) Solicitudes Pendientes\n";
+    print "3) Proveedores y Entregas\n";
+    print "0) Volver\n";
+
+    my $op = read_option("Opcion: ");
+    if ($op eq '1') {
+        $INVENTARIO->generar_reporte_dot("inventario/inventario.dot");
+        print "Reporte del inventario generado como 'inventario.dot'.\n";
+        system("dot -Tpng inventario/inventario.dot -o inventario/inventario.png");
+        pause();
+    } elsif ($op eq '2') {
+        $SOLICITUDES->generar_reporte_dot("solicitudes/solicitudes.dot");
+        print "Reporte de solicitudes generado como 'solicitudes.dot'.\n";
+        system("dot -Tpng solicitudes/solicitudes.dot -o solicitudes/solicitudes.png"); 
+        pause();
+    } elsif ($op eq '3') {
+        $PROVEEDORES->generar_reporte_dot("proveedores/proveedores.dot");
+        print "Reporte de proveedores generado como 'proveedores.dot'.\n";
+        system("dot -Tpng proveedores/proveedores.dot -o proveedores/proveedores.png"); 
+        pause();
+    } elsif ($op eq '0') {
+        return;
+    } else {
+        print "Opcion invalida.\n";
+        pause();
+    }
 }
 
 #---------------------------------------- Usuario ----------------------------------------
