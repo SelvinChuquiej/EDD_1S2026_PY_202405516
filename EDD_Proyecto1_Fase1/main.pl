@@ -8,10 +8,12 @@ use POSIX qw(strftime);
 use inventario::InventarioDLinkedList;
 use solicitudes::SolicitudCircularDLinkedList;
 use solicitudes::HistorialLinkedList;
+use proveedores::ProveedorCircularLinkedList;
 
 my $INVENTARIO = inventario::InventarioDLinkedList->new();
 my $SOLICITUDES = solicitudes::SolicitudCircularDLinkedList->new();
 my $HISTORIAL = solicitudes::HistorialLinkedList->new();
+my $PROVEEDORES = proveedores::ProveedorCircularLinkedList->new();
 
 our $ID_SOLICITUD = 0; 
 
@@ -83,13 +85,17 @@ sub menu_admin {
 
         if ($op eq '1') { 
             admin_registrar_medicamento(); 
-        }elsif ($op eq '2') { 
+        } elsif ($op eq '2') { 
             admin_carga_masiva_csv(); 
-        }elsif ($op eq '6') { 
+        } elsif ($op eq '3') {
+            admin_gestionar_proveedores();
+        } elsif ($op eq '4') { 
+            admin_registrar_entrega(); 
+        } elsif ($op eq '5') { 
+            admin_procesar_solicitudes();
+        } elsif ($op eq '6') { 
             $INVENTARIO->imprimir(); 
             pause();
-        }elsif ($op eq '5') { 
-            admin_procesar_solicitudes();
         } elsif($op eq '0') { 
             last; 
         } else { print "Opcion invalida.\n"; pause(); }
@@ -110,9 +116,7 @@ sub menu_usuario {
         } elsif($op eq '2') { 
             usuario_solicitar_reabastecimiento();
         } elsif($op eq '3') { 
-            my ($codigo_depto) = @_;
-            $HISTORIAL->imprimir_todo();
-            pause();
+            usuario_ver_historial();
         } elsif($op eq '0') { 
             last; 
         } else { 
@@ -233,9 +237,96 @@ sub admin_procesar_solicitudes {
     pause();
 }
 
+
+sub admin_gestionar_proveedores {
+    while (1) {
+        print "\n=== Gestionar Proveedores ===\n";
+        print "1) Registrar proveedor\n";
+        print "2) Ver proveedores\n";
+        print "0) Volver\n";
+
+        my $op = read_option("Opcion: ");
+        if ($op eq '1') {
+            admin_registrar_proveedor();
+        }
+        elsif ($op eq '2') {
+            $PROVEEDORES->imprimir();
+            pause();
+        }
+        elsif ($op eq '0') {
+            return;
+        }
+        else {
+            print "Opcion invalida.\n";
+            pause();
+        }
+    }
+}
+
+sub admin_registrar_proveedor {
+    
+    print "\n=== Registrar Proveedor ===\n";
+    print "NIT: "; chomp(my $nit = <STDIN>);
+    print "Nombre empresa: "; chomp(my $empresa = <STDIN>);
+    print "Contacto principal: "; chomp(my $contacto = <STDIN>);
+    print "Telefono: "; chomp(my $telefono = <STDIN>);
+    print "Direccion: "; chomp(my $direccion = <STDIN>);
+
+    my ($ok, $msg) = $PROVEEDORES->agregar({
+        nit => $nit,
+        empresa => $empresa,
+        contacto => $contacto,
+        telefono => $telefono,
+        direccion => $direccion,
+    });
+
+    print "$msg\n";
+    pause();
+}
+
+sub admin_registrar_entrega {
+
+    print "\n=== Registrar Entrega ===\n";
+    print "NIT del proveedor: ";chomp(my $nit = <STDIN>);
+    my $proveedor = $PROVEEDORES->buscar_nit($nit);
+    if (!$proveedor) {
+        print "Proveedor no encontrado.\n";
+        pause();
+        return;
+    }
+    print "Fecha (YYYY-MM-DD): "; chomp(my $fecha = <STDIN>);
+    print "Numero de factura: "; chomp(my $factura = <STDIN>);
+    print "Codigo del medicamento (MED000): "; chomp(my $codigo_med = <STDIN>);
+    my $med = $INVENTARIO->buscar_codigo($codigo_med);
+    if (!$med) {
+        print "Error: El medicamento no existe en el inventario.\n";
+        pause();
+        return;
+    }
+    print "Cantidad entregada: "; chomp(my $cantidad = <STDIN>);
+
+    $proveedor->{entregas}->agregar({
+        fecha => $fecha,
+        factura => $factura,
+        codigo_med => $codigo_med,
+        cantidad => $cantidad,
+    });
+
+    my ($ok, $msg) = $INVENTARIO->actualizar_stock($codigo_med, $cantidad);
+    if ($ok) {
+        print "Entrega registrada correctamente.\n";
+    } else {
+        print "Entrega registrada pero: $msg\n";
+    }
+
+    pause();
+}
+
 #---------------------------------------- Usuario ----------------------------------------
 
 sub usuario_consultar_disponibilidad {
+
+    print "\n=== Consultar Disponibilidad ===\n";
     print "\nIngrese codigo de medicamento: ";
     chomp(my $code = <STDIN>);
     my $node = $INVENTARIO->buscar_codigo($code);
@@ -250,7 +341,15 @@ sub usuario_consultar_disponibilidad {
 }
 
 sub usuario_solicitar_reabastecimiento {
+
+    print "\n=== Solicitar Reabastecimiento ===\n";
     print "Codigo de medicamento: "; chomp(my $codigo_med = <STDIN>);
+    my $med = $INVENTARIO->buscar_codigo($codigo_med);
+    if (!$med) {
+        print "Error: El medicamento no existe en el inventario.\n";
+        pause();
+        return;
+    }
     print "Cantidad solicitada: "; chomp(my $cantidad = <STDIN>);
     print "Prioridad (urgente/alta/media/baja): "; chomp(my $prioridad = <STDIN>);
     print "Justificacion: "; chomp(my $justificacion = <STDIN>);
