@@ -35,11 +35,11 @@ sub menu_principal {
         if ($op eq '1') { 
             menu_admin(); 
         } elsif ($op eq '2') { 
-            menu_usuario(); 
+            menu_usuario();
         } elsif ($op eq '0') { 
             last; 
         } else { 
-            print "Opción inválida.\n"; pause();
+            print "Opcion invalida.\n"; pause();
         }
     }
 }
@@ -80,13 +80,13 @@ sub menu_usuario {
         print "1) Consultar Disponibilidad de Medicamentos\n";
         print "2) Solicitar Reabastecimiento\n";
         print "3) Ver Historial de Solicitudes\n";
-        print "0) Cerrar sesión\n";
-        my $op = read_option("Opcion: : ");
+        print "0) Cerrar sesion\n";
+        my $op = read_option("Opcion: ");
 
         if($op eq '1') { 
-            print "Funcionalidad no implementada aun.\n";
+            usuario_consultar_disponibilidad();
         } elsif($op eq '2') { 
-            solicitar_reabastecimiento();
+            usuario_solicitar_reabastecimiento();
         } elsif($op eq '3') { 
             print "Funcionalidad no implementada aun.\n";
         } elsif($op eq '0') { 
@@ -97,12 +97,12 @@ sub menu_usuario {
     }
 }
 
-# Admin
+#---------------------------------------- Admin ----------------------------------------
 sub admin_registrar_medicamento { 
     print "Registrar medicamento\n"; 
-    print "Código: (MED000)"; chomp(my $code = <STDIN>);
+    print "Codigo (MED000): "; chomp(my $code = <STDIN>);
     if ($INVENTARIO->buscar_codigo($code)) {
-        print "Error: Código ya existe.\n"; pause();
+        print "Error: Codigo ya existe.\n"; pause();
         return;
     }
     print "Nombre: "; chomp(my $name = <STDIN>);
@@ -111,7 +111,7 @@ sub admin_registrar_medicamento {
     print "Stock: "; chomp(my $stock = <STDIN>);
     print "Fecha de Vencimiento (YYYY-MM-DD): "; chomp(my $expiration = <STDIN>);
     print "Precio: "; chomp(my $price = <STDIN>);
-    print "Nivel Mínimo: "; chomp(my $min_level = <STDIN>);
+    print "Nivel Minimo: "; chomp(my $min_level = <STDIN>);
 
     $INVENTARIO->agregar({
         code => $code,
@@ -205,8 +205,22 @@ sub admin_procesar_solicitudes {
     return;
 }
 
-# Usuario
-sub solicitar_reabastecimiento {
+#---------------------------------------- Usuario ----------------------------------------
+sub usuario_consultar_disponibilidad {
+    print "\nIngrese codigo de medicamento: ";
+    chomp(my $code = <STDIN>);
+    my $node = $INVENTARIO->buscar_codigo($code);
+    if ($node) {
+        print "Medicamento: $node->{name}\n";
+        print "Stock disponible: $node->{stock}\n";
+        print "Fecha de vencimiento: $node->{expiration}\n";
+    } else {
+        print "Medicamento no encontrado.\n";
+    }
+    pause();
+}
+
+sub usuario_solicitar_reabastecimiento {
 
     print "Codigo de departamento: "; chomp(my $codigo_depto = <STDIN>);
     print "Codigo de medicamento: "; chomp(my $codigo_med = <STDIN>);

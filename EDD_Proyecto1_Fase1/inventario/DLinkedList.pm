@@ -77,6 +77,7 @@ sub agregar {
 sub imprimir {
     my ($self) = @_;
     my $current = $self->{head};
+    print "\n-----------Inventario-----------\n";
     while ($current) {
         print "Codigo: $current->{code}, Nombre: $current->{name}, Principio Activo: $current->{principle}, Laboratorio: $current->{laboratory}, Stock: $current->{stock}, Fecha de Vencimiento: $current->{expiration}, Precio: $current->{price}, Nivel Minimo: $current->{min_level}\n";
         if ($current->{stock} < $current->{min_level}) {
