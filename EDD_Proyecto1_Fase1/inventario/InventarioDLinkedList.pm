@@ -1,4 +1,4 @@
-package inventario::DLinkedList;
+package inventario::InventarioDLinkedList;
 
 use strict;
 use warnings;

@@ -5,11 +5,15 @@ use lib $FindBin::Bin;
 use Text::CSV;
 use POSIX qw(strftime);
 
-use inventario::DLinkedList;
-use solicitudes::CircularDLinkedList;
+use inventario::InventarioDLinkedList;
+use solicitudes::SolicitudCircularDLinkedList;
+use solicitudes::HistorialLinkedList;
 
-my $INVENTARIO = inventario::DLinkedList->new();
-my $SOLICITUDES = solicitudes::CircularDLinkedList->new();
+my $INVENTARIO = inventario::InventarioDLinkedList->new();
+my $SOLICITUDES = solicitudes::SolicitudCircularDLinkedList->new();
+my $HISTORIAL = solicitudes::HistorialLinkedList->new();
+
+our $ID_SOLICITUD = 0; 
 
 sub read_option {
     my ($msg) = @_;
@@ -32,10 +36,28 @@ sub menu_principal {
 
         my $op = read_option("Opcion: ");
 
-        if ($op eq '1') { 
-            menu_admin(); 
+        if ($op eq '1') {  
+            my $username = read_option("Username: ");
+            my $password = read_option("Password: ");
+            if ($username eq 'admin' && $password eq 'admin') {
+                print "Login exitoso.\n";
+                menu_admin(); 
+                pause();
+            } else {
+                print "Credenciales incorrectas.\n";
+                pause();
+            }
         } elsif ($op eq '2') { 
-            menu_usuario();
+            my $username = read_option("Codigo Departamento: ");
+            my $password = read_option("Password: ");
+            if ($username eq 'user' && $password eq 'user') {
+                print "Login exitoso.\n";
+                pause();
+                menu_usuario(); 
+            } else {
+                print "Credenciales incorrectas.\n";
+                pause();
+            }
         } elsif ($op eq '0') { 
             last; 
         } else { 
@@ -62,7 +84,7 @@ sub menu_admin {
         if ($op eq '1') { 
             admin_registrar_medicamento(); 
         }elsif ($op eq '2') { 
-            carga_masiva_csv(); 
+            admin_carga_masiva_csv(); 
         }elsif ($op eq '6') { 
             $INVENTARIO->imprimir(); 
             pause();
@@ -88,7 +110,9 @@ sub menu_usuario {
         } elsif($op eq '2') { 
             usuario_solicitar_reabastecimiento();
         } elsif($op eq '3') { 
-            print "Funcionalidad no implementada aun.\n";
+            my ($codigo_depto) = @_;
+            $HISTORIAL->imprimir_todo();
+            pause();
         } elsif($op eq '0') { 
             last; 
         } else { 
@@ -98,6 +122,7 @@ sub menu_usuario {
 }
 
 #---------------------------------------- Admin ----------------------------------------
+
 sub admin_registrar_medicamento { 
     print "Registrar medicamento\n"; 
     print "Codigo (MED000): "; chomp(my $code = <STDIN>);
@@ -127,7 +152,7 @@ sub admin_registrar_medicamento {
     pause();
 }
 
-sub carga_masiva_csv {
+sub admin_carga_masiva_csv {
     print "Ingrese nombre del archivo CSV: ";
     chomp(my $file = <STDIN>);
     open(my $fh, "<", $file) or die "No se pudo abrir el archivo.\n";
@@ -157,15 +182,16 @@ sub carga_masiva_csv {
 
 sub admin_procesar_solicitudes {
     my $sol = $SOLICITUDES->mirar_head();
+    my $total = $SOLICITUDES->contar();
 
     if (!$sol) {
         print "No hay solicitudes pendientes.\n";
         pause();
         return;
     }
-
+    print "Solicitudes pendientes: $total\n";
     print "\n=== Solicitud Pendiente ===\n";
-    print "Depto: " . ($sol->{codigo_depto} // "N/A") . "\n";
+    print "ID: " . ($sol->{codigo_depto} // "N/A") . "\n";
     print "Medicamento: " . ($sol->{codigo_med} // "N/A") . "\n";
     print "Cantidad: " . ($sol->{cantidad} // 0) . "\n";
     print "Prioridad: " . ($sol->{prioridad} // "N/A") . "\n";
@@ -175,18 +201,18 @@ sub admin_procesar_solicitudes {
     print "\n1) Aprobar\n";
     print "2) Rechazar\n";
     print "0) Volver\n";
-
     my $op = read_option("Opcion: ");
+    return if $op eq '0';
+
+    my $id   = $sol->{id};
+    my $code = $sol->{codigo_med};
+    my $qty  = $sol->{cantidad};
 
     if ($op eq '1') {
-        my $code = $sol->{codigo_med};
-        my $qty  = $sol->{cantidad};
-
         my ($ok, $msg) = $INVENTARIO->actualizar_stock($code, -$qty);
-
         if ($ok) {
-            $sol->{estado} = "aprobada";  
-            $SOLICITUDES->remove_head();
+            $SOLICITUDES->remove_head(); 
+            $HISTORIAL->actualizar_estado($id, "aprobada");
             print "Solicitud aprobada. $msg\n";
         } else {
             print "No se pudo aprobar: $msg\n";
@@ -196,16 +222,19 @@ sub admin_procesar_solicitudes {
     }
 
     if ($op eq '2') {
-        $sol->{estado} = "rechazada";
         $SOLICITUDES->remove_head();
+        $HISTORIAL->actualizar_estado($id, "rechazada");
         print "Solicitud rechazada.\n";
         pause();
         return;
     }
-    return;
+
+    print "Opcion invalida.\n";
+    pause();
 }
 
 #---------------------------------------- Usuario ----------------------------------------
+
 sub usuario_consultar_disponibilidad {
     print "\nIngrese codigo de medicamento: ";
     chomp(my $code = <STDIN>);
@@ -221,28 +250,40 @@ sub usuario_consultar_disponibilidad {
 }
 
 sub usuario_solicitar_reabastecimiento {
-
-    print "Codigo de departamento: "; chomp(my $codigo_depto = <STDIN>);
     print "Codigo de medicamento: "; chomp(my $codigo_med = <STDIN>);
     print "Cantidad solicitada: "; chomp(my $cantidad = <STDIN>);
     print "Prioridad (urgente/alta/media/baja): "; chomp(my $prioridad = <STDIN>);
     print "Justificacion: "; chomp(my $justificacion = <STDIN>);
     my $fecha = strftime("%Y-%m-%d", localtime);
 
-    $SOLICITUDES->agregar({
-        codigo_depto => $codigo_depto,
+    my $id = ++$ID_SOLICITUD;  
+    my $data = {
+        id => $id,
+        codigo_depto => "user",
         codigo_med => $codigo_med,
         cantidad => $cantidad,
         prioridad => $prioridad,
         justificacion => $justificacion,
         fecha_solicitud => $fecha,
         estado => "pendiente"
-    });
+    };
+
+    $HISTORIAL->agregar($data);
+    $SOLICITUDES->agregar($data);
 
     print "Solicitud creada correctamente.\n";
     pause();
 }
 
+sub usuario_ver_historial {
+    print "\n=== Historial de Solicitudes ===\n";
+    if ($HISTORIAL->is_empty()) {
+        print "No hay solicitudes registradas.\n";
+    } else {
+        $HISTORIAL->imprimir_todo();
+    }
+    pause();
+}
 
 menu_principal();
 print "Saliendo...\n";

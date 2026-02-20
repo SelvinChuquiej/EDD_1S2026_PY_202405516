@@ -6,6 +6,7 @@ use warnings;
 sub new {
     my ($class, $data) = @_;
     my $self = {
+        id => $data->{id},
         codigo_depto => $data->{codigo_depto},
         codigo_med => $data->{codigo_med},
         cantidad => $data->{cantidad},

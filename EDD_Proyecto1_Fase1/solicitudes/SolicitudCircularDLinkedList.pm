@@ -1,4 +1,4 @@
-package solicitudes::CircularDLinkedList;
+package solicitudes::SolicitudCircularDLinkedList;
 
 use strict;
 use warnings;
@@ -86,6 +86,21 @@ sub mirar_head {
     my ($self) = @_;
     return undef if $self->is_empty();
     return $self->{head};
+}
+
+sub contar {
+    my ($self) = @_;
+    return 0 if $self->is_empty();
+
+    my $count = 0;
+    my $current = $self->{head};
+
+    do {
+        $count++;
+        $current = $current->{next};
+    } while ($current != $self->{head});
+
+    return $count;
 }
 
 1;
