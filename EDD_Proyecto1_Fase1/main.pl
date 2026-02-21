@@ -9,11 +9,13 @@ use inventario::InventarioDLinkedList;
 use solicitudes::SolicitudCircularDLinkedList;
 use solicitudes::HistorialLinkedList;
 use proveedores::ProveedorCircularLinkedList;
+use matriz::MatrizDispersa;
 
 my $INVENTARIO = inventario::InventarioDLinkedList->new();
 my $SOLICITUDES = solicitudes::SolicitudCircularDLinkedList->new();
 my $HISTORIAL = solicitudes::HistorialLinkedList->new();
 my $PROVEEDORES = proveedores::ProveedorCircularLinkedList->new();
+my $MATRIZ = matriz::MatrizDispersa->new();
 
 our $ID_SOLICITUD = 0; 
 
@@ -96,7 +98,9 @@ sub menu_admin {
         } elsif ($op eq '6') { 
             $INVENTARIO->imprimir(); 
             pause();
-        }elsif ($op eq '8') { 
+        } elsif ($op eq '7') { 
+            admin_consultar_por_medicamento();
+        } elsif ($op eq '8') { 
             admin_reportes_graphviz(); 
         } elsif($op eq '0') { 
             last; 
@@ -154,6 +158,15 @@ sub admin_registrar_medicamento {
         price => $price,
         min_level => $min_level
     });
+
+    $MATRIZ->insertar({
+        laboratorio => $laboratory,
+        medicamento => $name,
+        codigo_med => $code,
+        precio => $price,
+        principio_activo => $principle,
+    });
+
     print "Medicamento registrado.\n";
     pause();
 }
@@ -175,6 +188,14 @@ sub admin_carga_masiva_csv {
             stock => $stock,
             expiration => $expiration,
             min_level => $min_level
+        });
+
+        $MATRIZ->insertar({
+            laboratorio => $laboratory,
+            medicamento => $name,
+            codigo_med => $code,
+            precio => $price,
+            principio_activo => $principle,
         });
 
         print "Medicamento $code cargado.\n";
@@ -237,7 +258,6 @@ sub admin_procesar_solicitudes {
     print "Opcion invalida.\n";
     pause();
 }
-
 
 sub admin_gestionar_proveedores {
     while (1) {
@@ -320,6 +340,13 @@ sub admin_registrar_entrega {
         print "Entrega registrada pero: $msg\n";
     }
 
+    pause();
+}
+
+sub admin_consultar_por_medicamento {
+    print "\n=== Consultar por Medicamento (Comparar Laboratorios) ===\n";
+    my $nombre = read_option("Nombre del medicamento: ");
+    $MATRIZ->consultar_por_medicamento($nombre, $INVENTARIO);
     pause();
 }
 
