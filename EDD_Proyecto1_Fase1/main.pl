@@ -164,6 +164,7 @@ sub admin_registrar_medicamento {
         medicamento => $name,
         codigo_med => $code,
         precio => $price,
+        stock => $stock,
         principio_activo => $principle,
     });
 
@@ -195,6 +196,7 @@ sub admin_carga_masiva_csv {
             medicamento => $name,
             codigo_med => $code,
             precio => $price,
+            stock => $stock,
             principio_activo => $principle,
         });
 
@@ -355,6 +357,7 @@ sub admin_reportes_graphviz {
     print "1) Inventario\n";
     print "2) Solicitudes Pendientes\n";
     print "3) Proveedores y Entregas\n";
+    print "4) Matriz Dispersa\n";
     print "0) Volver\n";
 
     my $op = read_option("Opcion: ");
@@ -372,6 +375,11 @@ sub admin_reportes_graphviz {
         $PROVEEDORES->generar_reporte_dot("proveedores/proveedores.dot");
         print "Reporte de proveedores generado como 'proveedores.dot'.\n";
         system("dot -Tpng proveedores/proveedores.dot -o proveedores/proveedores.png"); 
+        pause();
+    } elsif ($op eq '4') {
+        $MATRIZ->generar_reporte_dot("matriz/matriz.dot");
+        print "Reporte de la matriz dispersa generado como 'matriz.dot'.\n";
+        system("dot -Tpng matriz/matriz.dot -o matriz/matriz.png"); 
         pause();
     } elsif ($op eq '0') {
         return;

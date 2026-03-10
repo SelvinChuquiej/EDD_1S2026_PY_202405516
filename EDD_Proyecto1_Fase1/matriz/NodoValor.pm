@@ -9,6 +9,7 @@ sub new {
         medicamento => $data->{medicamento},   
         codigo_med => $data->{codigo_med},    
         precio => $data->{precio},
+        stock => $data->{stock},
         principio_activo => $data->{principio_activo},
 
         up => undef,

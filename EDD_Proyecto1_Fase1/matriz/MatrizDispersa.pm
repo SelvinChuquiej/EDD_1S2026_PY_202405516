@@ -172,4 +172,111 @@ sub consultar_por_medicamento {
     }
 }
 
+sub generar_reporte_dot {
+    my ($self, $archivo) = @_;
+    open(my $fh, '>', $archivo) or die "No se pudo crear archivo DOT: $!";
+
+    my $safe = sub {
+        my ($t) = @_;
+        $t = "" unless defined $t;
+        $t =~ s/\\/\\\\/g;
+        $t =~ s/"/\\"/g;
+        return $t;
+    };
+
+    print $fh "digraph MatrizDispersa {\n";
+    print $fh "  graph [rankdir=LR, nodesep=0.6, ranksep=0.7, splines=ortho];\n";
+    print $fh "  node  [fontname=\"Verdana\", fontsize=10];\n";
+    print $fh "  edge  [arrowsize=0.7];\n\n";
+    print $fh "  MT [label=\"MATRIZ\\nINVENTARIO\", shape=box, style=filled, fillcolor=\"#b3b3b3\"];\n\n";
+
+    my %col_group;
+    my @cols_ids;
+
+    my $col = $self->{columnas};
+    my $g = 2;
+    while ($col) {
+        my $col_name = $col->{id};
+        my $cid = "C_" . _limpiar_id($col_name);
+        $col_group{$col_name} = $g++;
+        push @cols_ids, $cid;
+        my $lbl = $safe->($col_name);
+        print $fh "  $cid [label=\"$lbl\", shape=box, style=filled, fillcolor=\"#E0E0E0\", group=$col_group{$col_name}];\n";
+        $col = $col->{next};
+    }
+
+    if (@cols_ids) {
+        print $fh "  MT -> $cols_ids[0] [constraint=true];\n";
+        for (my $i = 0; $i < $#cols_ids; $i++) {
+            print $fh "  $cols_ids[$i] -> $cols_ids[$i+1] [constraint=true];\n";
+        }
+        print $fh "  { rank=same; MT; " . join("; ", @cols_ids) . " }\n\n";
+    }
+
+    my @rows_ids;
+    my $fila = $self->{filas};
+    while ($fila) {
+        my $row_name = $fila->{id};
+        my $rid = "F_" . _limpiar_id($row_name);
+        push @rows_ids, $rid;
+        my $lbl = $safe->($row_name);
+        print $fh "  $rid [label=\"$lbl\", shape=box, style=filled, fillcolor=\"#ADD8E6\", group=1];\n";
+        $fila = $fila->{next};
+    }
+
+    if (@rows_ids) {
+        print $fh "  MT -> $rows_ids[0] [constraint=true];\n";
+        for (my $i = 0; $i < $#rows_ids; $i++) {
+            print $fh "  $rows_ids[$i] -> $rows_ids[$i+1] [constraint=true];\n";
+        }
+        print $fh "\n";
+    }
+
+    $fila = $self->{filas};
+    while ($fila) {
+        my $row_name = $fila->{id};
+        my $rid = "F_" . _limpiar_id($row_name);
+        my @rank_same = ($rid);
+        my $n = $fila->{access};
+        while ($n) {
+            my $med_name = $n->{medicamento};
+            my $cid = "C_" . _limpiar_id($med_name);
+            my $vid = "V_" . _limpiar_id($row_name) . "_" . _limpiar_id($med_name);
+            my $codigo = defined $n->{codigo_med} ? $n->{codigo_med} : "";
+            my $precio = defined $n->{precio} ? $n->{precio} : "";
+            my $pa     = defined $n->{principio_activo} ? $n->{principio_activo} : "";
+            my $cant   = defined $n->{cantidad} ? $n->{cantidad}
+                       : defined $n->{stock}    ? $n->{stock}
+                       : "";
+            my $lbl = "COD:$codigo";
+            $lbl .= "\\nCant:$cant" if $cant ne "";
+            $lbl .= "\\nQ.$precio"  if $precio ne "";
+            $lbl .= "\\n$pa"        if $pa ne "";
+            $lbl = $safe->($lbl);
+            my $grp = exists $col_group{$med_name} ? $col_group{$med_name} : 99;
+            print $fh "  $vid [label=\"$lbl\", shape=ellipse, style=filled, fillcolor=\"#ffffe0\", group=$grp];\n";
+            print $fh "  $rid -> $vid [constraint=true];\n";
+            print $fh "  $cid -> $vid [constraint=true, style=dashed, color=\"#999999\"];\n";
+            push @rank_same, $vid;
+            $n = $n->{right};
+        }
+        print $fh "  { rank=same; " . join("; ", @rank_same) . " }\n\n";
+        $fila = $fila->{next};
+    }
+
+    print $fh "}\n";
+    close($fh);
+}
+
+sub _limpiar_id {
+    my ($txt) = @_;
+    $txt = "" unless defined $txt;
+    $txt =~ s/^\s+|\s+$//g;
+    $txt =~ s/\s+/_/g;
+    $txt =~ s/[^A-Za-z0-9_]/_/g;
+    $txt = "X" if $txt eq "";
+
+    return $txt;
+}
+
 1;
