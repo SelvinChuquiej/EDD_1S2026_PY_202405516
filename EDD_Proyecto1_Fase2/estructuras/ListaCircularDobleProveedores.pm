@@ -1,4 +1,4 @@
-package estructuras::ListaCircularProveedores;
+package estructuras::ListaCircularDobleProveedores; 
 
 use strict;
 use warnings;   
@@ -11,7 +11,6 @@ sub new {
     my $self = {
         head => undef,
         tail => undef,
-        size => 0,
     };
     bless $self, $class;
     return $self;
@@ -96,6 +95,7 @@ sub list {
             nombre => $current->{nombre},
             telefono => $current->{telefono},
             direccion => $current->{direccion},
+            telefono => $current->{telefono},
             fecha_entrega => $current->{fecha_entrega},
             numero_factura => $current->{numero_factura},
             entrega => $current->{entrega},

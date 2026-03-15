@@ -1,4 +1,4 @@
-package matriz::NodoCabecera;
+package nodos::NodoCabecera;
 use strict;
 use warnings;
 
