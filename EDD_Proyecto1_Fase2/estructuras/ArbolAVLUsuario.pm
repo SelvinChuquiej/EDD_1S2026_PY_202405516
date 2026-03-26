@@ -151,17 +151,17 @@ sub _eliminar_recursivo {
 
     # Buscar el nodo por su número de colegio (alfabéticamente)
     if ($numero_colegio lt $nodo->{numero_colegio}) {
-        $nodo->{izq} = $self->_eliminar_recursivo($nodo->{izq}, $numero_colegio);
+        $nodo->{left} = $self->_eliminar_recursivo($nodo->{left}, $numero_colegio);
     } 
     elsif ($numero_colegio gt $nodo->{numero_colegio}) {
-        $nodo->{der} = $self->_eliminar_recursivo($nodo->{der}, $numero_colegio);
+        $nodo->{right} = $self->_eliminar_recursivo($nodo->{right}, $numero_colegio);
     } 
     else {
         # ¡Encontramos el nodo a eliminar!
         
         # Caso 1 o 2: Un hijo o ningún hijo
-        if (!defined $nodo->{izq} || !defined $nodo->{der}) {
-            my $temp = defined $nodo->{izq} ? $nodo->{izq} : $nodo->{der};
+        if (!defined $nodo->{left} || !defined $nodo->{right}) {
+            my $temp = defined $nodo->{left} ? $nodo->{left} : $nodo->{right};
 
             # Sin hijos (Nodo Hoja)
             if (!defined $temp) {
@@ -175,7 +175,7 @@ sub _eliminar_recursivo {
         # Caso 3: Dos hijos
         else {
             # Obtener el sucesor in-orden (el menor del subárbol derecho)
-            my $temp = $self->_encontrar_minimo($nodo->{der});
+            my $temp = $self->_encontrar_minimo($nodo->{right});
 
             # Copiar TODOS los datos del sucesor al nodo actual [cite: 298]
             $nodo->{numero_colegio}  = $temp->{numero_colegio};
@@ -186,7 +186,7 @@ sub _eliminar_recursivo {
             $nodo->{contrasena}      = $temp->{contrasena};
 
             # Eliminar el sucesor de su posición original
-            $nodo->{der} = $self->_eliminar_recursivo($nodo->{der}, $temp->{numero_colegio});
+            $nodo->{right} = $self->_eliminar_recursivo($nodo->{right}, $temp->{numero_colegio});
         }
     }
 
@@ -194,7 +194,7 @@ sub _eliminar_recursivo {
     return $nodo if !defined $nodo;
 
     # 2. ACTUALIZAR ALTURA DEL NODO ACTUAL
-    $nodo->{altura} = 1 + $self->_max($self->_altura($nodo->{izq}), $self->_altura($nodo->{der}));
+    $nodo->{altura} = 1 + $self->_max($self->_altura($nodo->{left}), $self->_altura($nodo->{right}));
 
     # 3. OBTENER FACTOR DE BALANCE
     my $balance = $self->_factor_balance($nodo);
@@ -202,21 +202,21 @@ sub _eliminar_recursivo {
     # 4. BALANCEAR EL ÁRBOL (ROTACIONES)
     
     # Caso Izquierda Izquierda (LL)
-    if ($balance > 1 && $self->_factor_balance($nodo->{izq}) >= 0) {
+    if ($balance > 1 && $self->_factor_balance($nodo->{left}) >= 0) {
         return $self->_rotacion_derecha($nodo);
     }
     # Caso Izquierda Derecha (LR)
-    if ($balance > 1 && $self->_factor_balance($nodo->{izq}) < 0) {
-        $nodo->{izq} = $self->_rotacion_izquierda($nodo->{izq});
+    if ($balance > 1 && $self->_factor_balance($nodo->{left}) < 0) {
+        $nodo->{left} = $self->_rotacion_izquierda($nodo->{left});
         return $self->_rotacion_derecha($nodo);
     }
     # Caso Derecha Derecha (RR)
-    if ($balance < -1 && $self->_factor_balance($nodo->{der}) <= 0) {
+    if ($balance < -1 && $self->_factor_balance($nodo->{right}) <= 0) {
         return $self->_rotacion_izquierda($nodo);
     }
     # Caso Derecha Izquierda (RL)
-    if ($balance < -1 && $self->_factor_balance($nodo->{der}) > 0) {
-        $nodo->{der} = $self->_rotacion_derecha($nodo->{der});
+    if ($balance < -1 && $self->_factor_balance($nodo->{right}) > 0) {
+        $nodo->{right} = $self->_rotacion_derecha($nodo->{right});
         return $self->_rotacion_izquierda($nodo);
     }
     return $nodo;
@@ -227,8 +227,8 @@ sub _encontrar_minimo {
     my $actual = $nodo;
     
     # Recorrer lo más a la izquierda posible
-    while (defined $actual->{izq}) {
-        $actual = $actual->{izq};
+    while (defined $actual->{left}) {
+        $actual = $actual->{left};
     }
     return $actual;
 }
