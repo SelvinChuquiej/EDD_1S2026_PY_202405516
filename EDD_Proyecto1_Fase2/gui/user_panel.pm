@@ -17,8 +17,7 @@ sub mostrar {
     $ventana->add($vbox);
 
     my $lbl = Gtk3::Label->new();
-    $lbl->set_markup("<span size='x-large'>Bienvenido, <b>" . $medico->{nombre_completo} . "</b></span>\n" .
-                     "<span color='gray'>" . $medico->{especialidad} . "</span>");
+    $lbl->set_markup("<span size='x-large'>Bienvenido, <b>" . $medico->{nombre_completo} . "</b></span>\n" . "<span color='gray'>" . $medico->{especialidad} . "</span>");
     $vbox->pack_start($lbl, 0, 0, 10);
 
     my $grid = Gtk3::Grid->new();

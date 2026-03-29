@@ -6,14 +6,14 @@ use warnings;
 sub new {
     my ($class, $data) = @_;
     my $self = {
-        code => $data->{code},
-        name => $data->{name},
-        principle => $data->{principle},
-        laboratory => $data->{laboratory},
-        price => $data->{price},
-        stock => $data->{stock},
-        expiration => $data->{expiration},
-        min_level => $data->{min_level},
+        codigo => $data->{codigo},
+        nombre => $data->{nombre},
+        principio_activo => $data->{principio_activo},
+        fabricante => $data->{fabricante},
+        precio_unitario => $data->{precio_unitario},
+        cantidad => $data->{cantidad},
+        fecha_vencimiento => $data->{fecha_vencimiento},
+        nivel_minimo => $data->{nivel_minimo},
         next => undef,
         prev => undef,
     };

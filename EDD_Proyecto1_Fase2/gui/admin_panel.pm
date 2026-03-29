@@ -5,7 +5,7 @@ use warnings;
 use Gtk3;
 
 sub mostrar {
-    my ($mi_avl, $mi_bst) = @_; 
+    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Panel de Administrador");
@@ -73,7 +73,31 @@ sub mostrar {
     $btn_salir->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::login;
-        gui::login::mostrar($mi_avl, $mi_bst);
+        gui::login::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+    });
+
+    $btn_cargaIn->signal_connect(clicked => sub {
+        my $dialogo = Gtk3::FileChooserDialog->new(
+            "Seleccionar JSON de Inventario", $ventana, 'open',
+            'Cancelar' => 'cancel', 'Abrir' => 'accept'
+        );
+        my $filtro = Gtk3::FileFilter->new();
+        $filtro->set_name("Archivos JSON");
+        $filtro->add_pattern("*.json");
+        $dialogo->add_filter($filtro);
+
+        if ($dialogo->run() eq 'accept') {
+            my $path = $dialogo->get_filename();
+            
+            require json::CargaInventario;
+            my $resultado = json::CargaInventario::cargar_desde_archivo($path, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+            
+            my $msg = Gtk3::MessageDialog->new($ventana, 'destroy-with-parent', 'info', 'ok', "");
+            $msg->set_markup($resultado);
+            $msg->run();
+            $msg->destroy();
+        }
+        $dialogo->destroy();
     });
 
     $btn_cargaUs->signal_connect(clicked => sub {
@@ -90,9 +114,12 @@ sub mostrar {
             my $path = $dialogo->get_filename();
             
             require json::CargaUsuario;
-            json::CargaUsuario::cargar_desde_archivo($path, $mi_avl);
-        
-            mostrar_mensaje($ventana, "info", "Datos cargados al AVL correctamente.");
+            my $resultado = json::CargaUsuario::cargar_desde_archivo($path, $mi_avl);
+
+            my $msg = Gtk3::MessageDialog->new($ventana, 'destroy-with-parent', 'info', 'ok', "");
+            $msg->set_markup($resultado);
+            $msg->run();
+            $msg->destroy();
         }
         $dialogo->destroy();
     });
@@ -100,13 +127,13 @@ sub mostrar {
     $btn_panelUs->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panelUs;
-        gui::admin_panelUs::mostrar($mi_avl);
+        gui::admin_panelUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     $btn_registrarUs->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_registrarUs;
-        gui::admin_registrarUs::mostrar($mi_avl, $mi_bst);
+        gui::admin_registrarUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     $caja_inferior->pack_start($btn_reportes, 1, 1, 0);

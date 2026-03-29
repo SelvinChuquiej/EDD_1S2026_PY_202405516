@@ -6,7 +6,7 @@ use Gtk3;
 use gui::admin_panel; 
 
 sub mostrar {
-    my ($mi_avl, $mi_bst) = @_; 
+    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Iniciar Sesion");
@@ -42,13 +42,13 @@ sub mostrar {
         if ($u eq 'AdminHospital' && $p eq 'MedTrack2025') {
             $ventana->hide();
             require gui::admin_panel;
-            gui::admin_panel::mostrar($mi_avl, $mi_bst);
+            gui::admin_panel::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
         } else {
             my $nodo = $mi_avl->buscar($u);
             if (defined $nodo && $nodo->{contrasena} eq $p) {
                 $ventana->hide();
                 require gui::user_panel;
-                gui::user_panel::mostrar($mi_avl, $mi_bst);
+                gui::user_panel::mostrar($nodo, $mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
             } else {
                 mostrar_mensaje($ventana, "error", "Datos incorrectos");
             }

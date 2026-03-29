@@ -6,7 +6,7 @@ use Gtk3;
 use util::Permisos; 
 
 sub mostrar {
-    my ($mi_avl, $mi_bst) = @_;
+    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov) = @_;
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("Registrar Nuevo Usuario Departamental");
@@ -84,7 +84,7 @@ sub mostrar {
     $btn_cancelar->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panel;
-        gui::admin_panel::mostrar($mi_avl, $mi_bst); 
+        gui::admin_panel::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     $btn_registrar->signal_connect(clicked => sub {
@@ -129,7 +129,7 @@ sub mostrar {
         
         $ventana->hide();   
         require gui::admin_panel;
-        gui::admin_panel::mostrar($mi_avl, $mi_bst);
+        gui::admin_panel::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     $ventana->show_all();

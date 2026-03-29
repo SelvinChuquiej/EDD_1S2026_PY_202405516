@@ -5,7 +5,7 @@ use warnings;
 use Gtk3;
 
 sub mostrar {
-    my ($mi_avl, $mi_bst) = @_; 
+    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov) = @_; 
 
     # Ventana principal
     my $ventana = Gtk3::Window->new('toplevel');
@@ -27,7 +27,7 @@ sub mostrar {
     $btn_volver->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panel; 
-        gui::admin_panel::mostrar($mi_avl, $mi_bst);
+        gui::admin_panel::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     my $hbox_cuerpo = Gtk3::Box->new('horizontal', 15);

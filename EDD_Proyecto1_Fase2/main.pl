@@ -3,12 +3,20 @@ use warnings;
 use lib '.';
 
 use Gtk3 '-init';
+
 use estructuras::ArbolAVLUsuario;
 use estructuras::ArbolBSTEquipos;
+use estructuras::ListaDobleMedicamentos;
+use estructuras::ArbolBInventario;
+use estructuras::ListaCircularProveedores;
+
 use gui::login;
 
 my $avl_usuarios = estructuras::ArbolAVLUsuario->new();
 my $bst_equipos = estructuras::ArbolBSTEquipos->new();
+my $lista_meds = estructuras::ListaDobleMedicamentos->new();
+my $arbol_b = estructuras::ArbolBInventario->new();
+my $lista_prov = estructuras::ListaCircularProveedores->new();
 
-gui::login::mostrar($avl_usuarios, $bst_equipos);
+gui::login::mostrar($avl_usuarios, $bst_equipos, $lista_meds, $arbol_b, $lista_prov);
 Gtk3->main();

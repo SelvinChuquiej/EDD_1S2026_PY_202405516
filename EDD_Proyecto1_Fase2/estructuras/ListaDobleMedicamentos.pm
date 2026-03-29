@@ -25,10 +25,10 @@ sub is_empty {
 sub add {
     my ($self, $data) = @_;
     my $nuevo_nodo = Nodo->new($data);
-    my $code_new = $nuevo_nodo->{code};
+    my $codigo_nuevo = $nuevo_nodo->{codigo};
 
-    if ($self->find($code_new)) {
-        print "Error: El medicamento con código '$code_new' ya existe en la lista.\n";
+    if ($self->find($codigo_nuevo)) {
+        print "Error: El medicamento con código '$codigo_nuevo' ya existe en la lista.\n";
         return;
     }
 
@@ -40,7 +40,7 @@ sub add {
     }
 
     # Insertar antes del head
-    if ($code_new lt $self->{head}->{code}) {
+        if ($codigo_nuevo lt $self->{head}->{codigo}) {
         $nuevo_nodo->{next} = $self->{head};
         $self->{head}->{prev} = $nuevo_nodo;
         $self->{head} = $nuevo_nodo;
@@ -48,7 +48,7 @@ sub add {
     }
 
     # Insertar después del tail
-    if ($code_new gt $self->{tail}->{code}) {
+        if ($codigo_nuevo gt $self->{tail}->{codigo}) {
         $nuevo_nodo->{prev} = $self->{tail};
         $self->{tail}->{next} = $nuevo_nodo;
         $self->{tail} = $nuevo_nodo;
@@ -58,7 +58,7 @@ sub add {
     # Insertar en medio
     my $current = $self->{head}->{next};
     while ($current) {
-        if ($code_new lt $current->{code}) {
+            if ($codigo_nuevo lt $current->{codigo}) {
             my $prev_node = $current->{prev};
             $prev_node->{next} = $nuevo_nodo;
             $nuevo_nodo->{prev} = $prev_node;
@@ -74,7 +74,7 @@ sub find {
     my ($self, $code) = @_;
     my $current = $self->{head};
     while ($current) {
-        if ($current->{code} eq $code) {
+            if ($current->{codigo} eq $code) {
             return $current;
         }
         $current = $current->{next};
@@ -88,14 +88,14 @@ sub list {
     my $current = $self->{head};
     while ($current) {
         push @datos, {
-            code       => $current->{code},
-            name       => $current->{name},
-            principle  => $current->{principle},
-            laboratory => $current->{laboratory},
-            price      => $current->{price},
-            stock      => $current->{stock},
-            expiration => $current->{expiration},
-            min_level  => $current->{min_level},
+            codigo => $current->{codigo},
+            nombre => $current->{nombre},
+            principio_activo => $current->{principio_activo},
+            fabricante => $current->{fabricante},
+            precio_unitario => $current->{precio_unitario},
+            cantidad => $current->{cantidad},
+            fecha_vencimiento => $current->{fecha_vencimiento},
+            nivel_minimo => $current->{nivel_minimo},
         };
         $current = $current->{next};
     }
@@ -126,10 +126,10 @@ sub reporte {
                 $color = "khaki";
             }
         }
-        my $label = "{ Codigo: $current->{code} | ".
-                    "Vence: $current->{expiration} | ".
-                    "Nombre: $current->{name} | ".
-                    "Stock: $current->{stock} }";
+        my $label = "{ Codigo: $current->{codigo} | ".
+                        "Vence: $current->{fecha_vencimiento} | ".
+                        "Nombre: $current->{nombre} | ".
+                        "Stock: $current->{cantidad} }";
         print $fh "\"$current\" [label=\"$label\", fillcolor=\"$color\"];\n";
         if ($current->{next}) {
             print $fh "\"$current\" -> \"$current->{next}\";\n";
