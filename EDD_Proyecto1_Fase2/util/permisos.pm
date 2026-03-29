@@ -1,4 +1,4 @@
-package gui::permisos;
+package util::permisos;
 
 use strict;
 use warnings;

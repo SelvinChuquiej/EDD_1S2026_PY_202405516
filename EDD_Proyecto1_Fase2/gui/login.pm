@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Gtk3;
 use gui::admin_panel; 
-use gui::registro;
 
 sub mostrar {
     my ($mi_avl, $mi_bst) = @_; 
@@ -13,6 +12,7 @@ sub mostrar {
     $ventana->set_title("EDD MedTrack - Iniciar Sesion");
     $ventana->set_default_size(400, 350);
     $ventana->set_position('center');
+    
     $ventana->signal_connect(destroy => sub { Gtk3->main_quit() });
 
     my $caja_principal = Gtk3::Box->new('vertical', 10);
@@ -35,9 +35,6 @@ sub mostrar {
     my $btn_login = Gtk3::Button->new_with_label("Iniciar Sesion");
     $caja_principal->pack_start($btn_login, 0, 0, 20);
 
-    my $btn_registro = Gtk3::Button->new_with_label("Registrate aqui");
-    $caja_principal->pack_start($btn_registro, 0, 0, 5);
-
     $btn_login->signal_connect(clicked => sub {
         my $u = $entry_usuario->get_text();
         my $p = $entry_pass->get_text();
@@ -56,10 +53,6 @@ sub mostrar {
                 mostrar_mensaje($ventana, "error", "Datos incorrectos");
             }
         }
-    });
-
-    $btn_registro->signal_connect(clicked => sub {
-        gui::registro::mostrar($ventana, $mi_avl);
     });
 
     $ventana->show_all();

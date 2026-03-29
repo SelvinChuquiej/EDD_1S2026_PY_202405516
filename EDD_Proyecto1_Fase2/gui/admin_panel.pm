@@ -3,66 +3,82 @@ package gui::admin_panel;
 use strict;
 use warnings;
 use Gtk3;
-use json::CargaUsuario;
 
 sub mostrar {
     my ($mi_avl, $mi_bst) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Panel de Administrador");
-    $ventana->set_default_size(1000, 500);
+    $ventana->set_default_size(700, 450); 
     $ventana->set_position('center');
     
     $ventana->signal_connect(destroy => sub { Gtk3->main_quit() });
 
-    my $caja_principal = Gtk3::Box->new('horizontal', 10);
-    $caja_principal->set_border_width(15);
+    my $caja_principal = Gtk3::Box->new('vertical', 20);
+    $caja_principal->set_border_width(20);
     $ventana->add($caja_principal);
 
-    my $caja_izq = Gtk3::Box->new('vertical', 10);
-    $caja_principal->pack_start($caja_izq, 1, 1, 0);
-
-    my $lbl_titulo_tabla = Gtk3::Label->new();
-    $lbl_titulo_tabla->set_markup("<span size='large' weight='bold'>Personal Medico Autorizado</span>");
-    $lbl_titulo_tabla->set_halign('start');
-    $caja_izq->pack_start($lbl_titulo_tabla, 0, 0, 0);
-
-    #Tabla de usuarios
-    my $modelo_tabla = Gtk3::ListStore->new('Glib::String', 'Glib::String', 'Glib::String', 'Glib::String');
-    my $vista_tabla = Gtk3::TreeView->new_with_model($modelo_tabla);
-
-    my @titulos = ("Numero de Colegio", "Nombre Completo", "Especialidad", "Departamento");
-    for my $i (0 .. $#titulos) {
-        my $render = Gtk3::CellRendererText->new();
-        my $col = Gtk3::TreeViewColumn->new_with_attributes($titulos[$i], $render, text => $i);
-        $col->set_sort_column_id($i); 
-        $vista_tabla->append_column($col);
-    }
-
-    my $scroll = Gtk3::ScrolledWindow->new();
-    $scroll->set_policy('automatic', 'automatic');
-    $scroll->add($vista_tabla);
-    $caja_izq->pack_start($scroll, 1, 1, 0);
-
-    #Botones y acciones
-    my $caja_der = Gtk3::Box->new('vertical', 15);
-    $caja_principal->pack_start($caja_der, 0, 0, 0);
-
+    # Encabezado
     my $lbl_bienvenida = Gtk3::Label->new();
-    $lbl_bienvenida->set_markup("<span size='large' weight='bold'>Bienvenido Administrador</span>");
-    $caja_der->pack_start($lbl_bienvenida, 0, 0, 20);
+    $lbl_bienvenida->set_markup("<span size='x-large' weight='bold'>Panel de Control Principal</span>\n<span color='gray'>Administrador General</span>");
+    $lbl_bienvenida->set_justify('center');
+    $caja_principal->pack_start($lbl_bienvenida, 0, 0, 10);
 
-    my $btn_carga = Gtk3::Button->new_with_label("Carga Masiva (JSON)");
-    my $btn_orden = Gtk3::Button->new_with_label("Recorridos");
-    my $btn_reportes = Gtk3::Button->new_with_label("Reportes");
+    # Contenedor columnas
+    my $grid_modulos = Gtk3::Grid->new();
+    $grid_modulos->set_column_spacing(20);
+    $grid_modulos->set_row_spacing(20);
+    $grid_modulos->set_column_homogeneous(1); 
+    $caja_principal->pack_start($grid_modulos, 1, 1, 0);
+
+    # Columna 1: Inventario
+    my $frame_inv = Gtk3::Frame->new("Modulo de Inventario");
+    my $caja_inv = Gtk3::Box->new('vertical', 10);
+    $caja_inv->set_border_width(15);
+    $frame_inv->add($caja_inv);
+    $grid_modulos->attach($frame_inv, 0, 0, 1, 1);
+
+    my $btn_cargaIn = Gtk3::Button->new_with_label("Carga Masiva Inventario (JSON)");
+    my $btn_gestionarIn_Equipo = Gtk3::Button->new_with_label("Gestionar Equipos Medicos");
+    my $btn_gestionarIn_Suministro = Gtk3::Button->new_with_label("Gestionar Suministros Medicos");
+    my $btn_matriz = Gtk3::Button->new_with_label("Consultar y Comparar Inventario");
+
+    $caja_inv->pack_start($btn_cargaIn, 0, 0, 0);
+    $caja_inv->pack_start($btn_gestionarIn_Equipo, 0, 0, 0);
+    $caja_inv->pack_start($btn_gestionarIn_Suministro, 0, 0, 0);
+    $caja_inv->pack_start($btn_matriz, 0, 0, 0);
+
+    # Columna 2: Personal
+    my $frame_us = Gtk3::Frame->new("Modulo de Personal");
+    my $caja_us = Gtk3::Box->new('vertical', 10);
+    $caja_us->set_border_width(15);
+    $frame_us->add($caja_us);
+    $grid_modulos->attach($frame_us, 1, 0, 1, 1);
+
+    my $btn_cargaUs = Gtk3::Button->new_with_label("Carga Masiva Usuarios (JSON)");
+    my $btn_registrarUs = Gtk3::Button->new_with_label("Registrar Usuario Departamental");
+    my $btn_panelUs = Gtk3::Button->new_with_label("Panel de Control de Personal");
     
-    $caja_der->pack_start($btn_carga, 0, 0, 0);
-    $caja_der->pack_start($btn_orden, 0, 0, 0);
-    $caja_der->pack_start($btn_reportes, 0, 0, 0);
+    $caja_us->pack_start($btn_cargaUs, 0, 0, 0);
+    $caja_us->pack_start($btn_registrarUs, 0, 0, 0);
+    $caja_us->pack_start($btn_panelUs, 0, 0, 0);
 
-    $btn_carga->signal_connect(clicked => sub {
+    # Seccion inferior
+    my $caja_inferior = Gtk3::Box->new('horizontal', 15);
+    $caja_principal->pack_end($caja_inferior, 0, 0, 0);
+
+    my $btn_reportes = Gtk3::Button->new_with_label("Generar Reportes (Graphviz)");
+    my $btn_salir = Gtk3::Button->new_with_label("Cerrar Sesion");
+
+    $btn_salir->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::login;
+        gui::login::mostrar($mi_avl, $mi_bst);
+    });
+
+    $btn_cargaUs->signal_connect(clicked => sub {
         my $dialogo = Gtk3::FileChooserDialog->new(
-            "Seleccionar archivo JSON", $ventana, 'open',
+            "Seleccionar archivo JSON de Usuarios", $ventana, 'open',
             'Cancelar' => 'cancel', 'Abrir' => 'accept'
         );
         my $filtro = Gtk3::FileFilter->new();
@@ -72,49 +88,31 @@ sub mostrar {
 
         if ($dialogo->run() eq 'accept') {
             my $path = $dialogo->get_filename();
-            print "Archivo seleccionado: $path\n";
+            
+            require json::CargaUsuario;
             json::CargaUsuario::cargar_desde_archivo($path, $mi_avl);
-            actualizar_tabla($mi_avl, $modelo_tabla);
+        
             mostrar_mensaje($ventana, "info", "Datos cargados al AVL correctamente.");
         }
         $dialogo->destroy();
     });
 
-    $btn_orden->signal_connect(clicked => sub {
-        require gui::admin_recorridos;
-        gui::admin_recorridos::mostrar($mi_avl, $mi_bst);
+    $btn_panelUs->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_panelUs;
+        gui::admin_panelUs::mostrar($mi_avl);
     });
 
-    $btn_reportes->signal_connect(clicked => sub {
-        my $codigo_dot = $mi_avl->generar_dot();
-        my $nombre_dot = "reporte_avl.dot";
-        open(my $fh, '>', $nombre_dot) or die "No se pudo crear el archivo dot: $!";
-        print $fh $codigo_dot;
-        close($fh);
-        
-        system("dot -Tpng $nombre_dot -o reporte_avl.png");
-        
-        system("xdg-open reporte_avl.png &");
-        
-        mostrar_mensaje($ventana, "info", "Reporte generado como 'reporte_avl.png'");
+    $btn_registrarUs->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_registrarUs;
+        gui::admin_registrarUs::mostrar($mi_avl, $mi_bst);
     });
+
+    $caja_inferior->pack_start($btn_reportes, 1, 1, 0);
+    $caja_inferior->pack_start($btn_salir, 0, 0, 0);
 
     $ventana->show_all();
-}
-
-sub actualizar_tabla {
-    my ($arbol, $modelo) = @_;
-    $modelo->clear(); 
-    my $nodos = $arbol->in_orden(); 
-    foreach my $n (@$nodos) {
-        my $iter = $modelo->append();
-        $modelo->set($iter, 
-            0 => $n->{numero_colegio},
-            1 => $n->{nombre_completo},
-            2 => $n->{especialidad} || "N/A",
-            3 => $n->{departamento}
-        );
-    }
 }
 
 sub mostrar_mensaje {
@@ -122,5 +120,6 @@ sub mostrar_mensaje {
     my $d = Gtk3::MessageDialog->new($p, 'destroy-with-parent', $tipo, 'ok', $txt);
     $d->run(); $d->destroy();
 }
+
 
 1;
