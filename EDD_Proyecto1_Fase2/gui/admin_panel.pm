@@ -70,6 +70,7 @@ sub mostrar {
 
         if ($dialogo->run() eq 'accept') {
             my $path = $dialogo->get_filename();
+            print "Archivo seleccionado: $path\n";
             json::CargaUsuario::cargar_desde_archivo($path, $mi_avl);
             actualizar_tabla($mi_avl, $modelo_tabla);
             mostrar_mensaje($ventana, "info", "Datos cargados al AVL correctamente.");
@@ -82,7 +83,17 @@ sub mostrar {
     });
 
     $btn_reportes->signal_connect(clicked => sub {
-        mostrar_mensaje($ventana, "info", "Generando reporte Graphviz...");
+        my $codigo_dot = $mi_avl->generar_dot();
+        my $nombre_dot = "reporte_avl.dot";
+        open(my $fh, '>', $nombre_dot) or die "No se pudo crear el archivo dot: $!";
+        print $fh $codigo_dot;
+        close($fh);
+        
+        system("dot -Tpng $nombre_dot -o reporte_avl.png");
+        
+        system("xdg-open reporte_avl.png &");
+        
+        mostrar_mensaje($ventana, "info", "Reporte generado como 'reporte_avl.png'");
     });
 
     $ventana->show_all();

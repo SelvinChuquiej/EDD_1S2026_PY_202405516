@@ -7,7 +7,7 @@ use gui::admin_panel;
 use gui::registro;
 
 sub mostrar {
-    my ($mi_avl) = @_; 
+    my ($mi_avl, $mi_bst) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Iniciar Sesion");
@@ -44,12 +44,14 @@ sub mostrar {
 
         if ($u eq 'AdminHospital' && $p eq 'MedTrack2025') {
             $ventana->hide();
-            print "Accediendo como Admin...\n";
-            gui::admin_panel::mostrar($mi_avl);
+            require gui::admin_panel;
+            gui::admin_panel::mostrar($mi_avl, $mi_bst);
         } else {
             my $nodo = $mi_avl->buscar($u);
             if (defined $nodo && $nodo->{contrasena} eq $p) {
-                mostrar_mensaje($ventana, "info", "Bienvenido " . $nodo->{nombre_completo});
+                $ventana->hide();
+                require gui::user_panel;
+                gui::user_panel::mostrar($mi_avl, $mi_bst);
             } else {
                 mostrar_mensaje($ventana, "error", "Datos incorrectos");
             }

@@ -3,14 +3,15 @@ package gui::registro;
 use strict;
 use warnings;
 use Gtk3;
+use gui::permisos;
 
 sub mostrar {
     my ($parent, $mi_avl) = @_;
 
     my $win = Gtk3::Window->new('toplevel');
-    $win->set_title("Registro de Personal Médico");
-    $win->set_default_size(450, 500);
-    $win->set_position('center_on_parent');
+    $win->set_title("Registro de Personal Medico");
+    #$win->set_default_size(400, 500);
+    $win->set_position('center');
     $win->set_transient_for($parent);
     $win->set_modal(1);
 
@@ -54,6 +55,11 @@ sub mostrar {
         my $id = $e_col->get_text();
         if ($id eq '' || $e_nom->get_text() eq '' || $e_pas->get_text() eq '') {
             mostrar_msj($win, "error", "Faltan datos obligatorios");
+            return;
+        }
+
+        if(!gui::permisos::validar_registro($cb_d->get_active_text(), $cb_t->get_active_text())) {
+            mostrar_msj($win, "error", "El tipo de usuario no es válido para ese departamento");
             return;
         }
 
