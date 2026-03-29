@@ -121,6 +121,22 @@ sub _buscar_recursivo {
     }
 }
 
+sub pre_orden {
+    my ($self) = @_;
+    my @resultado;
+    $self->_pre_orden_recursivo($self->{raiz}, \@resultado);
+    return \@resultado;
+}
+
+sub _pre_orden_recursivo {
+    my ($self, $nodo, $resultado) = @_;
+    if (defined $nodo) {
+        push @$resultado, $nodo; # Raíz
+        $self->_pre_orden_recursivo($nodo->{left}, $resultado); 
+        $self->_pre_orden_recursivo($nodo->{right}, $resultado); 
+    }
+}
+
 sub in_orden {
     my ($self) = @_;
     my @resultado;
@@ -134,6 +150,22 @@ sub _in_orden_recursivo {
         $self->_in_orden_recursivo($nodo->{left}, $resultado);
         push @$resultado, $nodo;
         $self->_in_orden_recursivo($nodo->{right}, $resultado);
+    }
+}
+
+sub post_orden {
+    my ($self) = @_;
+    my @resultado;
+    $self->_post_orden_recursivo($self->{raiz}, \@resultado);
+    return \@resultado;
+}
+
+sub _post_orden_recursivo {
+    my ($self, $nodo, $resultado) = @_;
+    if (defined $nodo) {
+        $self->_post_orden_recursivo($nodo->{left}, $resultado);  
+        $self->_post_orden_recursivo($nodo->{right}, $resultado); 
+        push @$resultado, $nodo;                                
     }
 }
 

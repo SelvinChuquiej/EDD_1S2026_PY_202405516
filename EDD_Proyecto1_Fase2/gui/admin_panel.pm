@@ -6,7 +6,7 @@ use Gtk3;
 use json::CargaUsuario;
 
 sub mostrar {
-    my ($mi_avl) = @_; 
+    my ($mi_avl, $mi_bst) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Panel de Administrador");
@@ -15,8 +15,8 @@ sub mostrar {
     
     $ventana->signal_connect(destroy => sub { Gtk3->main_quit() });
 
-    my $caja_principal = Gtk3::Box->new('horizontal', 20);
-    $caja_principal->set_border_width(20);
+    my $caja_principal = Gtk3::Box->new('horizontal', 10);
+    $caja_principal->set_border_width(15);
     $ventana->add($caja_principal);
 
     my $caja_izq = Gtk3::Box->new('vertical', 10);
@@ -27,6 +27,7 @@ sub mostrar {
     $lbl_titulo_tabla->set_halign('start');
     $caja_izq->pack_start($lbl_titulo_tabla, 0, 0, 0);
 
+    #Tabla de usuarios
     my $modelo_tabla = Gtk3::ListStore->new('Glib::String', 'Glib::String', 'Glib::String', 'Glib::String');
     my $vista_tabla = Gtk3::TreeView->new_with_model($modelo_tabla);
 
@@ -43,6 +44,7 @@ sub mostrar {
     $scroll->add($vista_tabla);
     $caja_izq->pack_start($scroll, 1, 1, 0);
 
+    #Botones y acciones
     my $caja_der = Gtk3::Box->new('vertical', 15);
     $caja_principal->pack_start($caja_der, 0, 0, 0);
 
@@ -51,11 +53,11 @@ sub mostrar {
     $caja_der->pack_start($lbl_bienvenida, 0, 0, 20);
 
     my $btn_carga = Gtk3::Button->new_with_label("Carga Masiva (JSON)");
-    my $btn_in_orden = Gtk3::Button->new_with_label("Mostrar AVL (In-Orden)");
-    my $btn_reportes = Gtk3::Button->new_with_label("Generar Reporte AVL");
+    my $btn_orden = Gtk3::Button->new_with_label("Recorridos");
+    my $btn_reportes = Gtk3::Button->new_with_label("Reportes");
     
     $caja_der->pack_start($btn_carga, 0, 0, 0);
-    $caja_der->pack_start($btn_in_orden, 0, 0, 0);
+    $caja_der->pack_start($btn_orden, 0, 0, 0);
     $caja_der->pack_start($btn_reportes, 0, 0, 0);
 
     $btn_carga->signal_connect(clicked => sub {
@@ -78,8 +80,9 @@ sub mostrar {
         $dialogo->destroy();
     });
 
-    $btn_in_orden->signal_connect(clicked => sub {
-        actualizar_tabla($mi_avl, $modelo_tabla);
+    $btn_orden->signal_connect(clicked => sub {
+        require gui::admin_recorridos;
+        gui::admin_recorridos::mostrar($mi_avl, $mi_bst);
     });
 
     $btn_reportes->signal_connect(clicked => sub {
