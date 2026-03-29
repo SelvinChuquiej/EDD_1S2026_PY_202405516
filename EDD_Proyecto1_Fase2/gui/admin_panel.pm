@@ -82,6 +82,12 @@ sub mostrar {
         gui::admin_panelEq::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
+    $btn_gestionarIn_Suministro->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_panelSum;
+        gui::admin_panelSum::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+    });
+
     $btn_cargaIn->signal_connect(clicked => sub {
         my $dialogo = Gtk3::FileChooserDialog->new(
             "Seleccionar JSON de Inventario", $ventana, 'open',
