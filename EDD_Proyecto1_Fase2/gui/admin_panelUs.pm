@@ -155,8 +155,8 @@ sub mostrar {
             } else {
                 if (defined $mi_avl->buscar($codigo)) {
                     $mi_avl->eliminar($codigo);
-                    actualizar_tabla($mi_avl, $modelo_tabla);
-                    mostrar_mensaje($ventana, "info", "El usuario '$codigo' ha sido eliminado.\nEl Árbol AVL ejecuto las rotaciones necesarias para mantener el balance.");
+                    actualizar_tabla($modelo_tabla, $mi_avl->in_orden());
+                    mostrar_mensaje($ventana, "info", "El usuario '$codigo' ha sido eliminado.\nEl Arbol AVL ejecuto las rotaciones necesarias para mantener el balance.");
                 } else {
                     mostrar_mensaje($ventana, "error", "No se encontro ningún usuario con el código '$codigo' para eliminar.");
                 }

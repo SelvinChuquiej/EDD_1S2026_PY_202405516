@@ -67,7 +67,7 @@ sub mostrar {
     $grid->attach($ent_esp, 1, 4, 1, 1);
 
     # 6. Contraseña
-    my $lbl_pass = Gtk3::Label->new("Contraseña:");
+    my $lbl_pass = Gtk3::Label->new("Contrasena:");
     $lbl_pass->set_halign('end');
     my $ent_pass = Gtk3::Entry->new();
     $ent_pass->set_visibility(0); 

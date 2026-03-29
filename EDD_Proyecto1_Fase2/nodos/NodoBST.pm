@@ -12,7 +12,7 @@ sub new {
         precio_unitario => $data->{precio_unitario},
         cantidad => $data->{cantidad},
         fecha_ingreso => $data->{fecha_ingreso},
-        nivel_min => $data->{nivel_min},
+        nivel_minimo => $data->{nivel_minimo},
         left => undef,
         right => undef,
     };

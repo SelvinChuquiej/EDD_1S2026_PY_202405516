@@ -41,8 +41,10 @@ sub cargar_desde_archivo {
 
         $arbol_avl->insertar($datos_nodo);
         $contador++;
-    }
-    return $contador; 
+    } 
+    my $resumen = "Carga de Usuarios Finalizada\n\n" .
+                  "Usuarios cargados: $contador";
+    return $resumen; 
 }
 
 1;

@@ -57,7 +57,7 @@ sub mostrar {
 
     my $btn_cargaUs = Gtk3::Button->new_with_label("Carga Masiva Usuarios (JSON)");
     my $btn_registrarUs = Gtk3::Button->new_with_label("Registrar Usuario Departamental");
-    my $btn_panelUs = Gtk3::Button->new_with_label("Panel de Control de Personal");
+    my $btn_panelUs = Gtk3::Button->new_with_label("Gestion de Personal");
     
     $caja_us->pack_start($btn_cargaUs, 0, 0, 0);
     $caja_us->pack_start($btn_registrarUs, 0, 0, 0);
@@ -74,6 +74,12 @@ sub mostrar {
         $ventana->hide();
         require gui::login;
         gui::login::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+    });
+
+    $btn_gestionarIn_Equipo->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_panelEq;
+        gui::admin_panelEq::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
     });
 
     $btn_cargaIn->signal_connect(clicked => sub {
