@@ -1,4 +1,4 @@
-package estructuras::ListaCircularDobleProveedores; 
+package estructuras::ListaCircularProveedores; 
 
 use strict;
 use warnings;   
@@ -10,7 +10,7 @@ sub new {
     my ($class) = @_;
     my $self = {
         head => undef,
-        tail => undef,
+        tail => undef, 
     };
     bless $self, $class;
     return $self;
@@ -20,14 +20,17 @@ sub is_empty {
     my ($self) = @_;
     return !defined $self->{head};
 }
+
 sub find {
     my ($self, $nit) = @_;
     return undef if $self->is_empty();
+    
     my $current = $self->{head};
     do {
         return $current if $current->{nit} eq $nit;
         $current = $current->{next};
     } while ($current != $self->{head});
+    
     return undef;
 }
 
@@ -35,51 +38,55 @@ sub add {
     my ($self, $data) = @_;
     my $nuevo_nodo = Nodo->new($data);
     my $nit_new = $nuevo_nodo->{nit};
+    
     if ($self->find($nit_new)) {
-        print "Error: El proveedor con NIT '$nit_new' ya existe en la lista.\n";
+        print "Aviso: El proveedor con NIT '$nit_new' ya existe. (Falta lógica para agregarle la nueva entrega al historial)\n";
         return;
     }
+    
     if ($self->is_empty()) {
         $self->{head} = $nuevo_nodo;
         $self->{tail} = $nuevo_nodo;
-        $nuevo_nodo->{next} = $nuevo_nodo;
-        $nuevo_nodo->{prev} = $nuevo_nodo;
-        return;
+        $nuevo_nodo->{next} = $self->{head}; 
+    } else {
+        $self->{tail}->{next} = $nuevo_nodo;
+        $nuevo_nodo->{next} = $self->{head};
+        $self->{tail} = $nuevo_nodo;
     }
-    $nuevo_nodo->{prev} = $self->{tail};
-    $nuevo_nodo->{next} = $self->{head};
-    $self->{tail}->{next} = $nuevo_nodo;
-    $self->{head}->{prev} = $nuevo_nodo;
-    $self->{tail} = $nuevo_nodo;
 }
 
 sub delete {
     my ($self, $nit) = @_;
     return if $self->is_empty();
+    
     my $current = $self->{head};
+    my $previous = $self->{tail}; 
+    
     do {
         if ($current->{nit} eq $nit) {
+            # Caso 1: Es el único nodo en la lista
             if ($self->{head} == $self->{tail}) {
                 $self->{head} = undef;
                 $self->{tail} = undef;
                 return;
             }
+            # Caso 2: Es la cabeza
             if ($current == $self->{head}) {
                 $self->{head} = $current->{next};
-                $self->{head}->{prev} = $self->{tail};
-                $self->{tail}->{next} = $self->{head};
+                $self->{tail}->{next} = $self->{head}; 
                 return;
             }
+            # Caso 3: Es la cola
             if ($current == $self->{tail}) {
-                $self->{tail} = $current->{prev};
+                $self->{tail} = $previous;
                 $self->{tail}->{next} = $self->{head};
-                $self->{head}->{prev} = $self->{tail};
                 return;
             }
-            $current->{prev}->{next} = $current->{next};
-            $current->{next}->{prev} = $current->{prev};
+            # Caso 4: Está en medio
+            $previous->{next} = $current->{next};
             return;
         }
+        $previous = $current;
         $current = $current->{next};
     } while ($current != $self->{head});
 }
@@ -88,6 +95,7 @@ sub list {
     my ($self) = @_;
     my @datos;
     return \@datos if $self->is_empty();
+    
     my $current = $self->{head};
     do {
         push @datos, {
@@ -95,27 +103,14 @@ sub list {
             nombre => $current->{nombre},
             telefono => $current->{telefono},
             direccion => $current->{direccion},
-            telefono => $current->{telefono},
             fecha_entrega => $current->{fecha_entrega},
             numero_factura => $current->{numero_factura},
             entrega => $current->{entrega},
         };
         $current = $current->{next};
     } while ($current != $self->{head});
+    
     return \@datos;
-}
-
-sub print_list {
-    my ($self) = @_;
-    if ($self->is_empty()) {
-        print "Lista vacía\n";
-        return;
-    }
-    my $current = $self->{head};
-    do {
-        print "NIT: $current->{nit} | Nombre: $current->{nombre} | Factura: $current->{numero_factura}\n";
-        $current = $current->{next};
-    } while ($current != $self->{head});
 }
 
 1;
