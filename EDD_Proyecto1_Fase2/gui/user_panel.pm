@@ -29,6 +29,15 @@ sub mostrar {
     $lbl_bienvenida->set_halign('start');
     $hbox_header->pack_start($lbl_bienvenida, 1, 1, 0);
 
+    my $btn_perfil = Gtk3::Button->new_with_label("Mi Perfil");
+    $hbox_header->pack_end($btn_perfil, 0, 0, 0);
+
+    $btn_perfil->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::user_panelPerfil;
+        gui::user_panelPerfil::mostrar($usuario_logueado, $mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz);
+    });
+
     my $btn_cerrar_sesion = Gtk3::Button->new_with_label("Cerrar Sesion");
     $hbox_header->pack_end($btn_cerrar_sesion, 0, 0, 0);
 
@@ -51,9 +60,9 @@ sub mostrar {
     $grid->set_halign('center');
     $caja_botones->pack_start($grid, 0, 0, 0);
 
-    my $btn_meds= Gtk3::Button->new_with_label("Consultar / Recetar Medicamentos");
-    my $btn_sumi = Gtk3::Button->new_with_label("Consultar / Utilizar Suministros");
-    my $btn_equip = Gtk3::Button->new_with_label("Consultar / Asignar Equipo");
+    my $btn_meds= Gtk3::Button->new_with_label("Consultar Medicamentos");
+    my $btn_sumi = Gtk3::Button->new_with_label("Consultar Suministros");
+    my $btn_equip = Gtk3::Button->new_with_label("Consultar Equipo");
 
     $btn_meds->set_size_request(250, 50);
     $btn_sumi->set_size_request(250, 50);
@@ -85,15 +94,21 @@ sub mostrar {
     }
 
     $btn_meds->signal_connect(clicked => sub {
-        print "Abriendo medicamentos...\n";
+        $ventana->hide();
+        require gui::user_panelMed;
+        gui::user_panelMed::mostrar($usuario_logueado, $mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz);
     });
 
     $btn_sumi->signal_connect(clicked => sub {
-        print "Abriendo suministros...\n";
+        $ventana->hide();
+        require gui::user_panelSum;
+        gui::user_panelSum::mostrar($usuario_logueado, $mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz);
     });
 
     $btn_equip->signal_connect(clicked => sub {
-        print "Abriendo equipos...\n";
+        $ventana->hide();
+        require gui::user_panelEq;
+        gui::user_panelEq::mostrar($usuario_logueado, $mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz);
     });
 
     $ventana->show_all();
