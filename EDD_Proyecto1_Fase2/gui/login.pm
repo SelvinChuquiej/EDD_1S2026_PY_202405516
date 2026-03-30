@@ -10,7 +10,7 @@ sub mostrar {
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Iniciar Sesion");
-    $ventana->set_default_size(400, 350);
+    $ventana->set_default_size(400, 380);
     $ventana->set_position('center');
     
     $ventana->signal_connect(destroy => sub { Gtk3->main_quit() });
@@ -33,7 +33,10 @@ sub mostrar {
     $caja_principal->pack_start($entry_pass, 0, 0, 5);
 
     my $btn_login = Gtk3::Button->new_with_label("Iniciar Sesion");
-    $caja_principal->pack_start($btn_login, 0, 0, 20);
+    $caja_principal->pack_start($btn_login, 0, 0, 15);
+
+    my $btn_info = Gtk3::Button->new_with_label("Informacion del Estudiante");
+    $caja_principal->pack_start($btn_info, 0, 0, 5);
 
     $btn_login->signal_connect(clicked => sub {
         my $u = $entry_usuario->get_text();
@@ -53,6 +56,18 @@ sub mostrar {
                 mostrar_mensaje($ventana, "error", "Datos incorrectos");
             }
         }
+    });
+
+    $btn_info->signal_connect(clicked => sub {
+        my $info_texto = "<span size='large' weight='bold'>Datos del Desarrollador</span>\n\n" .
+                         "<b>Nombre:</b> Selvin Raúl Chuquiej Andrade\n" .
+                         "<b>Carnet:</b> 202405516\n" .
+                         "<b>Curso:</b> Estructura de Datos Seccion A";
+                         
+        my $dialogo = Gtk3::MessageDialog->new($ventana, 'destroy-with-parent', 'info', 'ok', "");
+        $dialogo->set_markup($info_texto);
+        $dialogo->run();
+        $dialogo->destroy();
     });
 
     $ventana->show_all();
