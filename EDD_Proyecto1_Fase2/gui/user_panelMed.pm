@@ -53,7 +53,7 @@ sub mostrar {
             return;
         }
 
-        my $medicamento = $lista_meds->find($codigo);
+        my $medicamento = $lista_meds->buscar_codigo($codigo);
 
         if (defined $medicamento) {
             my $nombre = $medicamento->{nombre} || "Desconocido";

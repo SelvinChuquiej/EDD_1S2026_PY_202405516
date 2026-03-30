@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Gtk3;
 
-
 sub mostrar {
     my ($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz) = @_; 
 
@@ -124,7 +123,7 @@ sub mostrar {
             } else {
                 $mi_bst->insertar($nuevo_equipo);
                 
-                actualizar_tabla_eq($mi_bst, $modelo_tabla);
+                actualizar_tabla_eq($modelo_tabla, $mi_bst->in_orden());
                 mostrar_mensaje($ventana, "info", "Equipo '$nuevo_equipo->{codigo}' registrado en el BST.");
             }
         }

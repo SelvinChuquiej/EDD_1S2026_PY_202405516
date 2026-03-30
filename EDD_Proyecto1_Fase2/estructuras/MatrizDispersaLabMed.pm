@@ -161,23 +161,23 @@ sub _add_to_column {
 }
 
 sub list {
-        my ($self) = @_;
+    my ($self) = @_;
     my @datos;
 
     my $fila = $self->{filas};
     while ($fila) {
         my $current = $fila->{access};
         while ($current) {
+            
             push @datos, {
-                proveedor => $current->{proveedor},
-                fabricante => $current->{fabricante},
+                proveedor      => $current->{proveedor},
+                fabricante     => $current->{fabricante},
                 cantidad_total => $current->{cantidad_total},
             };
             $current = $current->{right};
         }
         $fila = $fila->{next};
     }
-
     return \@datos;
 }
 

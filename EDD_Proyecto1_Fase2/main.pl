@@ -21,6 +21,6 @@ my $arbol_b = estructuras::ArbolBInventario->new();
 my $lista_prov = estructuras::ListaCircularDobleProveedores->new();
 my $mi_matriz = estructuras::MatrizDispersaLabMed->new();
 
-gui::admin_panel::mostrar($avl_usuarios, $bst_equipos, $lista_meds, $arbol_b, $lista_prov, $mi_matriz); 
-#gui::login::mostrar($avl_usuarios, $bst_equipos, $lista_meds, $arbol_b, $lista_prov);
+#gui::admin_panel::mostrar($avl_usuarios, $bst_equipos, $lista_meds, $arbol_b, $lista_prov, $mi_matriz); 
+gui::login::mostrar($avl_usuarios, $bst_equipos, $lista_meds, $arbol_b, $lista_prov, $mi_matriz);
 Gtk3->main();

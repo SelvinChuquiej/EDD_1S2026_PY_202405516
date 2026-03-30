@@ -24,8 +24,8 @@ sub mostrar {
     
     $btn_volver->signal_connect(clicked => sub {
         $ventana->hide();
-        require gui::AdminPanel; 
-        gui::AdminPanel::mostrar($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz); 
+        require gui::admin_panel; 
+        gui::admin_panel::mostrar($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz); 
     });
 
     my $lbl_titulo = Gtk3::Label->new();

@@ -61,6 +61,10 @@ sub actualizar_tabla_matriz {
     return unless defined $matriz;
 
     my $datos = $matriz->list();
+    
+    if (scalar @$datos == 0) {
+        print "ADVERTENCIA: La matriz no tiene datos para mostrar.\n";
+    }
 
     foreach my $fila (@$datos) {
         my $iter = $modelo->append();

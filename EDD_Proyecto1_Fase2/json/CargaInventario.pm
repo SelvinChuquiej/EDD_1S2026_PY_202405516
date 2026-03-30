@@ -40,6 +40,13 @@ sub cargar_desde_archivo {
 
         # --- GESTIÓN DE PRODUCTOS (El Enrutador) ---
         foreach my $item (@{$prov->{entrega}}) {
+
+            my $fabricante = $item->{fabricante} || 'Generico';
+            my $cantidad = $item->{cantidad} || 0;
+            if (defined $mi_matriz) {
+                $mi_matriz->add($nombre_proveedor, $fabricante, $cantidad);
+            }
+
             my $codigo = $item->{codigo} || 'SIN_CODIGO';
             if (!defined $item->{cantidad} || $item->{cantidad} <= 0) {
                 $log_advertencias .= "Ignorado (Cantidad inválida): Ítem $codigo\n";
@@ -55,12 +62,6 @@ sub cargar_desde_archivo {
             if ($fecha_invalida) {
                 $log_advertencias .= "Ignorado (Fecha inválida): Ítem $codigo\n";
                 next;
-            }
-
-            my $fabricante = $item->{fabricante} || 'Generico';
-            my $cantidad = $item->{cantidad} || 0;
-            if (defined $mi_matriz) {
-                $mi_matriz->add($nombre_proveedor, $fabricante, $cantidad);
             }
 
             my $tipo = $item->{tipo} || '';
