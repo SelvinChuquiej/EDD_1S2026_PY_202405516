@@ -50,65 +50,28 @@ sub mostrar {
         $caja_botones->pack_start($btn, 0, 0, 0);
     }
 
-    
     $btn_rep_avl->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/avl_usuarios.dot";
-        my $ruta_png = "reportes/avl_usuarios.png";
-        
-        $mi_avl->generar_graphviz($ruta_dot, $ruta_png);       
-        mostrar_mensaje($ventana, "info", "Reporte del Arbol AVL generado con exito.\n\nPuedes encontrar la imagen en:\n$ruta_png");    
+        ejecutar_reporte($ventana, $mi_avl, "avl_usuarios", "Reporte del Arbol AVL de Usuarios");
     });
 
     $btn_rep_bst->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/bst_equipos.dot";
-        my $ruta_png = "reportes/bst_equipos.png";
-        
-        $mi_bst->generar_graphviz($ruta_dot, $ruta_png);
-        mostrar_mensaje($ventana, "info", "Reporte del Arbol BST generado con exito.\n\nPuedes encontrar la imagen en:\n$ruta_png");
+        ejecutar_reporte($ventana, $mi_bst, "bst_equipos", "Reporte del Arbol BST de Equipos Medicos");
     });
 
     $btn_rep_arbolb->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/arbolb_suministros.dot";
-        my $ruta_png = "reportes/arbolb_suministros.png";
-        
-        $arbol_b->generar_graphviz($ruta_dot, $ruta_png);  
-        mostrar_mensaje($ventana, "info", " Reporte del Arbol B (Suministros) generado.\n\nImagen: $ruta_png"); 
+        ejecutar_reporte($ventana, $arbol_b, "arbol_b_suministros", "Reporte del Arbol B de Suministros");
     });
 
     $btn_rep_listaD->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/lista_doble_medicamentos.dot";
-        my $ruta_png = "reportes/lista_doble_medicamentos.png";
-        
-        $lista_meds->generar_graphviz($ruta_dot, $ruta_png);  
-        mostrar_mensaje($ventana, "info", "Reporte de la Lista Doble (Medicamentos) generado.\n\nImagen: $ruta_png");   
+        ejecutar_reporte($ventana, $lista_meds, "lista_doble_medicamentos", "Reporte de la Lista Doble de Medicamentos");
     });
 
     $btn_rep_listaC->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/lista_circular_proveedores.dot";
-        my $ruta_png = "reportes/lista_circular_proveedores.png";
-        
-        $lista_prov->generar_graphviz($ruta_dot, $ruta_png);  
-        mostrar_mensaje($ventana, "info", "Reporte de la Lista Circular (Proveedores) generado.\n\nImagen: $ruta_png"); 
+        ejecutar_reporte($ventana, $lista_prov, "lista_circular_proveedores", "Reporte de la Lista Circular de Proveedores");
     });
 
     $btn_rep_matriz->signal_connect(clicked => sub {
-        mkdir "reportes" unless -d "reportes";
-        
-        my $ruta_dot = "reportes/matriz_dispersa.dot";
-        my $ruta_png = "reportes/matriz_dispersa.png";
-        
-        $mi_matriz->generar_graphviz($ruta_dot, $ruta_png);  
-        mostrar_mensaje($ventana, "info", "Reporte de la Matriz Dispersa generado.\n\nImagen guardada en: $ruta_png"); 
+        ejecutar_reporte($ventana, $mi_matriz, "matriz_dispersa", "Reporte de la Matriz Dispersa (Relacion Proveedor/Fabricante)");
     });
 
     $ventana->show_all();
@@ -119,6 +82,41 @@ sub mostrar_mensaje {
     my $dialogo = Gtk3::MessageDialog->new($parent, 'destroy-with-parent', $tipo, 'ok', $texto);
     $dialogo->run();
     $dialogo->destroy();
+}
+
+sub mostrar_imagen_reporte {
+    my ($ruta_png, $titulo) = @_;
+
+    if (!-e $ruta_png) {
+        print "Error: No se encontro la imagen en $ruta_png\n";
+        return;
+    }
+
+    my $ventana_img = Gtk3::Window->new('toplevel');
+    $ventana_img->set_title($titulo || "Visor de Reportes");
+    $ventana_img->set_default_size(800, 600); # Un tamaño decente por defecto
+    $ventana_img->set_position('center');
+
+    my $scroll = Gtk3::ScrolledWindow->new();
+    $scroll->set_policy('automatic', 'automatic');
+    $ventana_img->add($scroll);
+    my $imagen = Gtk3::Image->new_from_file($ruta_png);
+    $scroll->add($imagen);
+    $ventana_img->show_all();
+}
+
+sub ejecutar_reporte {
+    my ($ventana, $estructura, $nombre_archivo, $titulo) = @_;
+
+    mkdir "reportes" unless -d "reportes";
+
+    my $ruta_dot = "reportes/${nombre_archivo}.dot";
+    my $ruta_png = "reportes/${nombre_archivo}.png";
+
+    $estructura->generar_graphviz($ruta_dot, $ruta_png);
+
+    mostrar_mensaje($ventana, "info", "$titulo generado con éxito.\n\nImagen guardada en:\n$ruta_png");
+    mostrar_imagen_reporte($ruta_png, $titulo);
 }
 
 1;
