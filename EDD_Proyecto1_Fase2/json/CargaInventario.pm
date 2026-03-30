@@ -5,7 +5,7 @@ use warnings;
 use JSON::PP;
 
 sub cargar_desde_archivo {
-    my ($ruta, $bst, $lista_meds, $arbol_b, $lista_prov) = @_;
+    my ($ruta, $bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz) = @_;
 
     open(my $fh, '<', $ruta) or die "No se pudo abrir $ruta: $!";
     my $contenido = do { local $/; <$fh> };
@@ -17,25 +17,23 @@ sub cargar_desde_archivo {
         return "Error fatal: El archivo no es un formato JSON válido.";
     }
 
-    # Contadores para el reporte final
     my $log_advertencias = "";
     my $cont_med = 0;
     my $cont_eq = 0;
     my $cont_sum = 0;
     my $cont_prov = 0;
 
-    # Iterar sobre el arreglo principal "proveedor"
     foreach my $prov (@{$datos->{proveedor}}) {
         
+        my $nombre_proveedor = $prov->{nombre} || "Proveedor Desconocido";
+
         # --- GESTIÓN DEL PROVEEDOR (Lista Circular) ---
         my $nit = $prov->{nit};
         my $prov_existente = $lista_prov->find($nit);
         
         if ($prov_existente) {
-            # Si el proveedor ya existe, concatenamos la nueva entrega a su historial
             push @{$prov_existente->{entrega}}, @{$prov->{entrega}};
         } else {
-            # Si es nuevo, lo registramos en la Lista Circular
             $lista_prov->add($prov);
             $cont_prov++;
         }
@@ -43,14 +41,10 @@ sub cargar_desde_archivo {
         # --- GESTIÓN DE PRODUCTOS (El Enrutador) ---
         foreach my $item (@{$prov->{entrega}}) {
             my $codigo = $item->{codigo} || 'SIN_CODIGO';
-            
-            # Validación A: Cantidad debe ser mayor a 0
             if (!defined $item->{cantidad} || $item->{cantidad} <= 0) {
                 $log_advertencias .= "Ignorado (Cantidad inválida): Ítem $codigo\n";
                 next;
             }
-
-            # Validación B: Fechas con formato correcto (YYYY-MM-DD)
             my $fecha_invalida = 0;
             foreach my $campo_fecha ('fecha_vencimiento', 'fecha_ingreso') {
                 if (defined $item->{$campo_fecha} && $item->{$campo_fecha} !~ /^\d{4}-\d{2}-\d{2}$/) {
@@ -61,6 +55,12 @@ sub cargar_desde_archivo {
             if ($fecha_invalida) {
                 $log_advertencias .= "Ignorado (Fecha inválida): Ítem $codigo\n";
                 next;
+            }
+
+            my $fabricante = $item->{fabricante} || 'Generico';
+            my $cantidad = $item->{cantidad} || 0;
+            if (defined $mi_matriz) {
+                $mi_matriz->add($nombre_proveedor, $fabricante, $cantidad);
             }
 
             my $tipo = $item->{tipo} || '';

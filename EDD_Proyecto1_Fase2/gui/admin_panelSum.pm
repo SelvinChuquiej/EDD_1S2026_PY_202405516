@@ -5,7 +5,7 @@ use warnings;
 use Gtk3;
 
 sub mostrar {
-    my ($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov) = @_; 
+    my ($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("Gestion de Inventario - Suministros (Arbol B Orden 4)");
@@ -25,7 +25,7 @@ sub mostrar {
     $btn_volver->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panel; 
-        gui::admin_panel::mostrar($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov); 
+        gui::admin_panel::mostrar($mi_avl, $mi_bst, $lista_meds, $arbol_b, $lista_prov, $mi_matriz); 
     });
 
     my $hbox_cuerpo = Gtk3::Box->new('horizontal', 15);

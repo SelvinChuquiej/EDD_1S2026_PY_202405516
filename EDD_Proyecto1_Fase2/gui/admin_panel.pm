@@ -5,7 +5,7 @@ use warnings;
 use Gtk3;
 
 sub mostrar {
-    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov) = @_; 
+    my ($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz) = @_; 
 
     my $ventana = Gtk3::Window->new('toplevel');
     $ventana->set_title("EDD MedTrack - Panel de Administrador");
@@ -73,19 +73,19 @@ sub mostrar {
     $btn_salir->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::login;
-        gui::login::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+        gui::login::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
     $btn_gestionarIn_Equipo->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panelEq;
-        gui::admin_panelEq::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+        gui::admin_panelEq::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
     $btn_gestionarIn_Suministro->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panelSum;
-        gui::admin_panelSum::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+        gui::admin_panelSum::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
     $btn_cargaIn->signal_connect(clicked => sub {
@@ -102,7 +102,7 @@ sub mostrar {
             my $path = $dialogo->get_filename();
             
             require json::CargaInventario;
-            my $resultado = json::CargaInventario::cargar_desde_archivo($path, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+            my $resultado = json::CargaInventario::cargar_desde_archivo($path, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
             
             my $msg = Gtk3::MessageDialog->new($ventana, 'destroy-with-parent', 'info', 'ok', "");
             $msg->set_markup($resultado);
@@ -139,13 +139,19 @@ sub mostrar {
     $btn_panelUs->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_panelUs;
-        gui::admin_panelUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+        gui::admin_panelUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
     $btn_registrarUs->signal_connect(clicked => sub {
         $ventana->hide();
         require gui::admin_registrarUs;
-        gui::admin_registrarUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov);
+        gui::admin_registrarUs::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
+    });
+
+    $btn_matriz->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_panelMatriz;
+        gui::admin_panelMatriz::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
     $caja_inferior->pack_start($btn_reportes, 1, 1, 0);
@@ -154,7 +160,7 @@ sub mostrar {
     $ventana->show_all();
 }
 
-sub mostrar_mensaje {
+sub mostrar_mensaje { 
     my ($p, $tipo, $txt) = @_;
     my $d = Gtk3::MessageDialog->new($p, 'destroy-with-parent', $tipo, 'ok', $txt);
     $d->run(); $d->destroy();

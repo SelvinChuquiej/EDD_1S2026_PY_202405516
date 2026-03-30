@@ -2,6 +2,9 @@ package estructuras::MatrizDispersaLabMed;
 use strict;
 use warnings;
 
+use nodos::NodoCabecera;
+use nodos::NodoValor;
+
 sub new {
     my ($class) = @_;
     my $self = {
