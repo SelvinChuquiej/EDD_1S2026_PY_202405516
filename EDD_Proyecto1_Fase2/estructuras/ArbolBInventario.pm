@@ -331,4 +331,66 @@ sub _fusionar {
     splice @{$nodo->{hijos}},  $idx + 1, 1;
 }
 
+sub generar_graphviz {
+    my ($self, $ruta_dot, $ruta_png) = @_;
+
+    open(my $fh, '>:encoding(UTF-8)', $ruta_dot)
+        or die "No se pudo crear $ruta_dot: $!";
+
+    print $fh "digraph ArbolB_Suministros {\n";
+    print $fh "    graph [charset=\"UTF-8\"];\n";
+    print $fh "    node [shape=record, style=filled, fontname=\"Arial\"];\n";
+    print $fh "    edge [color=\"#333333\", fontname=\"Arial\", fontsize=10];\n";
+    print $fh "    label=\"Inventario de Suministros (Árbol B - Orden 4)\";\n";
+    print $fh "    labelloc=\"t\";\n";
+    print $fh "    rankdir=TB;\n";
+
+    if (defined $self->{raiz}) {
+        $self->_escribir_nodos_dot($self->{raiz}, $fh);
+    } else {
+        print $fh "    vacio [label=\"Árbol B Vacío\", fillcolor=\"#EEEEEE\"];\n";
+    }
+
+    print $fh "}\n";
+    close($fh);
+
+    system("dot", "-Gcharset=utf8", "-Tpng", $ruta_dot, "-o", $ruta_png);
+}
+
+sub _escribir_nodos_dot {
+    my ($self, $nodo, $fh) = @_;
+    return unless defined $nodo;
+
+    my @claves_nodo = @{ $nodo->{claves} // [] };
+    my $cantidad_actual = scalar @claves_nodo;
+    my $max_capacidad = 4;
+
+    my $color = ($cantidad_actual == $max_capacidad) ? "#FFFF99" : "#CCFFCC";
+
+    my @codigos = map {
+        ref($_) eq 'HASH' ? $_->{codigo} : $_
+    } @claves_nodo;
+
+    my $lista_codigos = join(" | ", @codigos);
+
+    my $label = "{ { $lista_codigos } | Capacidad: $cantidad_actual/$max_capacidad }";
+
+    my $node_id = "$nodo";
+    $node_id =~ s/\W/_/g;
+
+    print $fh "    \"$node_id\" [label=\"$label\", fillcolor=\"$color\"];\n";
+
+    if (defined $nodo->{hijos} && ref($nodo->{hijos}) eq 'ARRAY') {
+        foreach my $hijo (@{ $nodo->{hijos} }) {
+            next unless defined $hijo;
+
+            my $hijo_id = "$hijo";
+            $hijo_id =~ s/\W/_/g;
+
+            $self->_escribir_nodos_dot($hijo, $fh);
+            print $fh "    \"$node_id\" -> \"$hijo_id\";\n";
+        }
+    }
+}
+
 1;

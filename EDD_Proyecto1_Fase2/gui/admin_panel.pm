@@ -154,6 +154,12 @@ sub mostrar {
         gui::admin_panelMatriz::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
     });
 
+    $btn_reportes->signal_connect(clicked => sub {
+        $ventana->hide();
+        require gui::admin_panelReportes;
+        gui::admin_panelReportes::mostrar($mi_avl, $mi_bst, $mi_lista_meds, $mi_arbol_b, $mi_lista_prov, $mi_matriz);
+    });
+
     $caja_inferior->pack_start($btn_reportes, 1, 1, 0);
     $caja_inferior->pack_start($btn_salir, 0, 0, 0);
 

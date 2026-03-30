@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use nodos::NodoBST;
 
-# Constructor: crea un nuevo árbol BST vacío
 sub new {
     my ($class) = @_;
     my $self = {
@@ -15,17 +14,15 @@ sub new {
     return $self;
 }
 
-# Inserta un nuevo nodo con los datos proporcionados en el árbol
 sub insertar {
     my ($self, $datos) = @_;
     $self->{raiz} = $self->_insertar_recursivo($self->{raiz}, $datos);
 }
 
-# Inserción recursiva en el árbol BST
 sub _insertar_recursivo {
     my ($self, $nodo, $datos) = @_;
     if (!defined $nodo) {
-        return nodos::NodoBST->new($datos); # crea un nuevo nodo si está vacío
+        return nodos::NodoBST->new($datos);
     }
 
     if ($datos->{codigo} lt $nodo->{codigo}) {
@@ -37,13 +34,11 @@ sub _insertar_recursivo {
     return $nodo;
 }
 
-# Busca un nodo por su código
 sub find {
     my ($self, $codigo) = @_;
     return $self->_find_recursivo($self->{raiz}, $codigo);
 }
 
-# Búsqueda recursiva de un nodo por código
 sub _find_recursivo {
     my ($self, $nodo, $codigo) = @_;
     return undef if !defined $nodo; 
@@ -56,7 +51,6 @@ sub _find_recursivo {
     }
 }
 
-# Retorna una lista de nodos en recorrido pre-orden
 sub pre_orden {
     my ($self) = @_;
     my @resultado;
@@ -64,7 +58,6 @@ sub pre_orden {
     return \@resultado;
 }
 
-# Recorrido pre-orden recursivo
 sub _pre_orden_recursivo {
     my ($self, $nodo, $resultado) = @_;
     if (defined $nodo) {
@@ -74,7 +67,6 @@ sub _pre_orden_recursivo {
     }
 }
 
-# Retorna una lista de nodos en recorrido in-orden
 sub in_orden {
     my ($self) = @_;
     my @resultado;
@@ -82,7 +74,6 @@ sub in_orden {
     return \@resultado;
 }
 
-# Recorrido in-orden recursivo
 sub _in_orden_recursivo {
     my ($self, $nodo, $resultado) = @_;
     if (defined $nodo) {
@@ -92,7 +83,6 @@ sub _in_orden_recursivo {
     }
 }
 
-# Retorna una lista de nodos en recorrido post-orden
 sub post_orden {
     my ($self) = @_;
     my @resultado;
@@ -100,7 +90,6 @@ sub post_orden {
     return \@resultado;
 }
 
-# Recorrido post-orden recursivo
 sub _post_orden_recursivo {
     my ($self, $nodo, $resultado) = @_;
     if (defined $nodo) {
@@ -110,14 +99,11 @@ sub _post_orden_recursivo {
     }
 }
 
-# Elimina un nodo por su código
 sub eliminar {
     my ($self, $codigo) = @_;
     $self->{raiz} = $self->_eliminar_recursivo($self->{raiz}, $codigo);
 }
 
-# Eliminación recursiva de un nodo por código
-# Maneja los tres casos: hoja, un hijo, dos hijos
 sub _eliminar_recursivo {
     my ($self, $nodo, $codigo) = @_;
     return undef if !defined $nodo; 
@@ -143,7 +129,6 @@ sub _eliminar_recursivo {
         # Caso 4: dos hijos
         else {
             my $temp = $self->_encontrar_minimo($nodo->{right});
-            # Copia los datos del sucesor al nodo actual
             $nodo->{codigo} = $temp->{codigo};
             $nodo->{nombre}  = $temp->{nombre};
             $nodo->{fabricante} = $temp->{fabricante};
@@ -151,14 +136,12 @@ sub _eliminar_recursivo {
             $nodo->{cantidad} = $temp->{cantidad};
             $nodo->{fecha_ingreso} = $temp->{fecha_ingreso};
             $nodo->{nivel_minimo} = $temp->{nivel_minimo};
-            # Elimina el sucesor
             $nodo->{right} = $self->_eliminar_recursivo($nodo->{right}, $temp->{codigo});
         }
     }
     return $nodo;
 }
 
-# Encuentra el nodo con el valor mínimo (más a la izquierda)
 sub _encontrar_minimo {
     my ($self, $nodo) = @_;
     my $actual = $nodo;
@@ -166,6 +149,63 @@ sub _encontrar_minimo {
         $actual = $actual->{left};
     }
     return $actual;
+}
+
+sub generar_graphviz {
+    my ($self, $ruta_dot, $ruta_png) = @_;
+    
+    open(my $fh, '>', $ruta_dot) or die "No se pudo crear $ruta_dot: $!";
+    
+    print $fh "digraph BST_Equipos {\n";
+    print $fh "    node [shape=record, style=filled, fontname=\"Arial\"];\n";
+    print $fh "    edge [fontname=\"Arial\", fontsize=10];\n";
+    print $fh "    label=\"Inventario de Equipos Médicos (Árbol BST)\";\n";
+    print $fh "    labelloc=\"t\";\n";
+    
+    if (defined $self->{raiz}) {
+        $self->_escribir_nodos_dot($self->{raiz}, $fh, 1);
+    } else {
+        print $fh "    \"Vacio\" [label=\"Árbol Vacío\"];\n";
+    }
+    
+    print $fh "}\n";
+    close($fh);
+    
+    system("dot -Tpng \"$ruta_dot\" -o \"$ruta_png\"");
+}
+
+sub _escribir_nodos_dot {
+    my ($self, $nodo, $fh, $es_raiz) = @_;
+    return unless defined $nodo;
+    
+    my $cod = $nodo->{codigo};
+    my $nom = $nodo->{nombre};
+    my $mar = $nodo->{fabricante} || "N/A";
+    my $can = $nodo->{cantidad};
+    my $vid = $nodo->{vida_util}  || "N/A"; # O usas fecha_ingreso si no tienes vida útil
+    
+    my $color = "white"; # Nodos internos normales
+    if ($es_raiz) {
+        $color = "lightblue"; # La Raíz
+    } elsif (!defined $nodo->{left} && !defined $nodo->{right}) {
+        $color = "lightgreen"; # Las Hojas (sin hijos)
+    }
+    
+    my $label = "{ Código: $cod | Nombre: $nom | Marca: $mar | Cantidad: $can | Vida Útil: $vid }";
+    
+    print $fh "    \"$cod\" [label=\"$label\", fillcolor=\"$color\"];\n";
+    
+    if (defined $nodo->{left}) {
+        my $cod_izq = $nodo->{left}->{codigo};
+        print $fh "    \"$cod\" -> \"$cod_izq\" [label=\" Izq\", color=\"blue\", fontcolor=\"blue\"];\n";
+        $self->_escribir_nodos_dot($nodo->{left}, $fh, 0);
+    }
+    
+    if (defined $nodo->{right}) {
+        my $cod_der = $nodo->{right}->{codigo};
+        print $fh "    \"$cod\" -> \"$cod_der\" [label=\" Der\", color=\"red\", fontcolor=\"red\"];\n";
+        $self->_escribir_nodos_dot($nodo->{right}, $fh, 0);
+    }
 }
 
 1;

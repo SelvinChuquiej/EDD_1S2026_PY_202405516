@@ -236,50 +236,54 @@ sub _encontrar_minimo {
     return $actual;
 }
 
-sub generar_dot {
-    my ($self) = @_;
-    my $dot = "digraph G {\n";
-    $dot .= "  node [shape=circle, style=filled, fillcolor=lightblue, fixedsize=false, width=1.5];\n";
-    $dot .= "  edge [arrowhead=normal];\n";
+sub generar_graphviz {
+    my ($self, $ruta_dot, $ruta_png) = @_;
     
+    open(my $fh, '>:encoding(UTF-8)', $ruta_dot) or die "No se pudo crear $ruta_dot: $!";
+    
+    print $fh "digraph AVL_Usuarios {\n";
+    print $fh "    node [shape=circle, style=filled, fillcolor=lightyellow, fontname=\"Arial\"];\n";
+    print $fh "    edge [fontname=\"Arial\", fontsize=10];\n";
+    print $fh "    label=\"Usuarios Registrados (Árbol AVL)\";\n";
+    print $fh "    labelloc=\"t\";\n";
+    
+    # Llamamos a la función recursiva
     if (defined $self->{raiz}) {
-        $dot .= $self->_recorrer_dot($self->{raiz});
+        $self->_escribir_nodos_dot($self->{raiz}, $fh);
     } else {
-        $dot .= "  nulo [label=\"Árbol Vacío\"];\n";
+        print $fh "    \"Vacio\" [label=\"Árbol Vacío\"];\n";
     }
     
-    $dot .= "}\n";
-    return $dot;
+    print $fh "}\n";
+    close($fh);
+    
+    system("dot -Gcharset=utf8 -Tpng \"$ruta_dot\" -o \"$ruta_png\"");
 }
 
-sub _recorrer_dot {
-    my ($self, $nodo) = @_;
-    my $contenido = "";
+sub _escribir_nodos_dot {
+    my ($self, $nodo, $fh) = @_;
+    return unless defined $nodo;
     
-    my $fe = $self->_factor_balance($nodo);
-    my $id_actual = "\"n" . $nodo->{numero_colegio} . "\"";
+    my $col = $nodo->{numero_colegio}  || "N/A";
+    my $nom = $nodo->{nombre_completo} || "N/A";
+    my $tip = $nodo->{tipo_usuario}    || "N/A";
+    my $dep = $nodo->{departamento}    || "N/A";
     
-    my $label_text = "Col: " . $nodo->{numero_colegio} . "\\n" .
-                     $nodo->{nombre_completo} . "\\n" .
-                     $nodo->{tipo_usuario} . "\\n" .
-                     $nodo->{departamento} . "\\n" .
-                     "FE: " . $fe;
-                     
-    $contenido .= "  $id_actual [label=\"$label_text\"];\n";
+    my $label = "$col\\n$nom\\n$tip\\n$dep";
+    
+    print $fh "    \"$col\" [label=\"$label\"];\n";
     
     if (defined $nodo->{left}) {
-        my $id_izq = "\"n" . $nodo->{left}->{numero_colegio} . "\"";
-        $contenido .= "  $id_actual -> $id_izq;\n";
-        $contenido .= $self->_recorrer_dot($nodo->{left});
+        my $col_izq = $nodo->{left}->{numero_colegio};
+        print $fh "    \"$col\" -> \"$col_izq\" [label=\" Izq\", color=\"blue\", fontcolor=\"blue\"];\n";
+        $self->_escribir_nodos_dot($nodo->{left}, $fh);
     }
     
     if (defined $nodo->{right}) {
-        my $id_der = "\"n" . $nodo->{right}->{numero_colegio} . "\"";
-        $contenido .= "  $id_actual -> $id_der;\n";
-        $contenido .= $self->_recorrer_dot($nodo->{right});
+        my $col_der = $nodo->{right}->{numero_colegio};
+        print $fh "    \"$col\" -> \"$col_der\" [label=\" Der\", color=\"red\", fontcolor=\"red\"];\n";
+        $self->_escribir_nodos_dot($nodo->{right}, $fh);
     }
-    
-    return $contenido;
 }
 
 1;

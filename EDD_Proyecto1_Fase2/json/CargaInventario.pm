@@ -66,7 +66,7 @@ sub cargar_desde_archivo {
             my $tipo = $item->{tipo} || '';
             
             if ($tipo eq 'MEDICAMENTO') {
-                $lista_meds->add($item);
+                $lista_meds->agregar($item);
                 $cont_med++;
             } 
             elsif ($tipo eq 'EQUIPO') {

@@ -13,7 +13,8 @@ sub new {
         fecha_entrega => $data->{fecha_entrega},
         numero_factura => $data->{numero_factura},
         entrega => $data->{entrega},
-        next => undef
+        next => undef,
+        prev => undef,
     };
     bless $self, $class;
     return $self;
