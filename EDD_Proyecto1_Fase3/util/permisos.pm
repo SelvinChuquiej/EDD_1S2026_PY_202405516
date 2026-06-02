@@ -24,8 +24,9 @@ my %tabla_permisos = (
         tipos  => ['TIPO-03'],
         acceso => 'MEDICAMENTOS'
     },
-    'SIN-DEP' = {
-        tipos = ['TIPO-01', 'TIPO-02', 'TIPO-03', 'TIPO-04']
+    'SIN-DEP' =>    {
+        tipos => [''],
+        acceso => ''
     }
 );
 
@@ -41,6 +42,15 @@ sub validar_registro {
 sub obtener_acceso {
     my ($depto) = @_;
     return exists $tabla_permisos{$depto} ? $tabla_permisos{$depto}{acceso} : 'NINGUNO';
+}
+
+sub obtener_tipos_permitidos {
+    my ($depto) = @_;
+    
+    if (exists $tabla_permisos{$depto}) {
+        return @{$tabla_permisos{$depto}{tipos}}; 
+    }
+    return ();
 }
 
 1;
